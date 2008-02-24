@@ -1,0 +1,44 @@
+Changelog for Spaceman Spiff's Chording Keyboard Experiment
+
+
+Version 0.98 - Current pre-release
+----------------------------------
+
+ * Changed key tables to 16-bits. Allows modifiers directly in keymaps.
+
+
+Version 0.97 - released 2008-01-05
+----------------------------------
+
+Test release.
+ * Additional special strings for * and +.
+ * Debounce implemented with hardware timer. Timeout specified in msec.
+ * Key repeat timeout using hardware timer. 22msec unit, maximum key repeat
+   delay is ~5 sec.
+ * Bugfix: leave num/sym-mode after special strings.
+ * Implemented multi-mode (one chord for shift+num-mode).
+
+
+Version 0.92 - not publically released
+--------------------------------------
+
+Major overhaul.
+ * Chord decoding totally re-written in layered architecture.
+ * Implemented "early detect" (key down event when first button released).
+
+
+Version 0.91 - not publically released
+--------------------------------------
+
+Small update.
+ * Implemented special strings (multiple characters from single chord).
+
+
+Version 0.90 - not publically released
+--------------------------------------
+
+Initial. Mostly working original feature set.
+ * Three modes (normal, function keys, numbers/symbols).
+ * switch debouncing with counter.
+ * Modifier keys working - modifier locks unused.
+ * Boot protocol compatible.
