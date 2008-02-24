@@ -1,6 +1,7 @@
 /*********************************************************************
  * nasa_us.h - Keyboard mapping for nasa-style chords with American  *
  * keyboard setting on the PC side.                                  *
+ * $Id::                                                           $ *
  *********************************************************************
  * SpiffChorder is Copyright (C) 2006-2008 Mikkel Holm Olsen         *
  * based on HID-Test by Christian Starkjohann, Objective Development *

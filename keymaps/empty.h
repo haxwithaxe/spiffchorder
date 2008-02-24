@@ -1,6 +1,7 @@
 /*********************************************************************
  * empty.h                                                           *
  * a Blank Keyboard mapping for a 7 key chorder with 3 modes         *
+ * $Id::                                                           $ *
  *********************************************************************
  * SpiffChorder is Copyright (C) 2006-2008 Mikkel Holm Olsen         *
  * based on HID-Test by Christian Starkjohann, Objective Development *

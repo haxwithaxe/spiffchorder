@@ -1,5 +1,6 @@
 /*********************************************************************
  * keycodes.h - Constants used for general keyboard mapping          *
+ * $Id::                                                           $ *
  *********************************************************************
  * SpiffChorder is Copyright (C) 2006-2008 Mikkel Holm Olsen         *
  * based on HID-Test by Christian Starkjohann, Objective Development *

@@ -5,7 +5,8 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
- * This Revision: $Id: usbconfig.h 43 2005-04-10 21:04:36Z cs $
+ * Bases on: Id: usbconfig.h 43 2005-04-10 21:04:36Z cs 
+ * $Id$
  */
 
 #ifndef __usbconfig_h_included__
