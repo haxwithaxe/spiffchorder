@@ -1,7 +1,7 @@
 /*********************************************************************
  * main.c - Main firmware (ATmega8 version)                          *
  * Version 0.98                                                      *
- * 2008-01-05                                                        *
+ * $Id::                                                           $ *
  *********************************************************************
  * SpiffChorder is Copyright (C) 2006-2008 Mikkel Holm Olsen         *
  * based on HID-Test by Christian Starkjohann, Objective Development *
@@ -182,11 +182,6 @@ ISR(TIMER2_COMP_vect) {
   /* This gets called every 1ms and updates the button debounce counter */
   if (debounce>1) {
     --debounce;
-#ifdef LED_DEBUG
-    PORTC|=1;
-  } else {
-    PORTC&=~1;
-#endif
   }
 }
 
@@ -401,15 +396,15 @@ int main(void) {
     }
 
     /* Check timer if we need periodic reports */
-    if(TIFR & (1<<TOV0)){
+    if (TIFR & (1<<TOV0)) {
       TIFR = 1<<TOV0; /* Reset flag */
       if (key_repeat>REP_STATE_TIMEOUT) {
         --key_repeat;
       }
-      if(idleRate != 0){ /* Do we need periodic reports? */
+      if (idleRate != 0) { /* Do we need periodic reports? */
         if(idleCounter > 4){ /* Yes, but not yet */
           idleCounter -= 5;   /* 22 ms/tick */
-        }else{ /* Yes, it is time now */
+        } else { /* Yes, it is time now */
           updateNeeded = 1;
           idleCounter = idleRate;
         }
@@ -417,7 +412,7 @@ int main(void) {
     }
     
     /* If an update is needed, send the report */
-    if(updateNeeded && usbInterruptIsReady()){
+    if (updateNeeded && usbInterruptIsReady()) {
       updateNeeded = 0;
       usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
     }
