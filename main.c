@@ -192,10 +192,10 @@ uchar mod_state=0, mod_lock=0;
 uchar current_mode=0, lock_mode=0;
 
 /* Used to send the key_up event */
-const prog_keymap_t key_up[] = {0};
+const uint8_t PROGMEM key_up[] = {0};
 
 /* This pointer tells us something needs to be sent before returning to keyboard scanning */
-const prog_keymap_t *pendingPtr = key_up;
+const uint8_t *pendingPtr = key_up;
 
 unsigned char process_chord(uchar chord) {
 #ifdef KEYMAP_USES_MODIFIERS
@@ -215,7 +215,7 @@ unsigned char process_chord(uchar chord) {
   if (key>=DIV_Mods) { // This is not a standard key
     if (key>=DIV_Multi) { // Either Multi or Special
       if (key>=DIV_Special) { /* Special Key */
-        pendingPtr=(const prog_keymap_t*)pgm_read_word(&special_strings[key-DIV_Special]);
+        pendingPtr=(const uint8_t*)pgm_read_word(&special_strings[key-DIV_Special]);
         //mod_state&=mod_lock; 
         if (!lock_mode) { // Reset mode unless it was locked
           current_keymap=keymap_default;
@@ -303,7 +303,7 @@ uchar scankeys(void) {
     }
   } else {
     if (key_repeat==REP_STATE_TIMEOUT) {
-      retval=key_change(data,1); // Process time out
+      retval=key_change(data,1); // Send key-down
       key_repeat=REP_STATE_KEYDOWN_SENT;
     }
   }
