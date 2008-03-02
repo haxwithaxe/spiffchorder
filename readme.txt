@@ -25,11 +25,11 @@ based on Objective Development's license, which is now GPL, but with
 the addition that the hardware is documented and open as well.
 
 Objective Development's AVR USB driver is a firmware-only implementation 
-of the low speed USB standard (USB 1.1) which can be used on cheap AVR 
+of the low speed USB standard (1.5Mbps) which can be used on cheap AVR 
 microcontrollers from Atmel.
 
 The hardware for the SpiffChorder is very simple, and consists mainly of 
-an ATmega8, a 12MHz crystal, and a few passive components for interfacing 
+an ATmega168, a 12MHz crystal, and a few passive components for interfacing 
 with the USB port. Apart from this 7 switches are connected, and 
 optionally 3 LEDs for indicating the internal state. 
 
@@ -110,7 +110,7 @@ changes.txt             What has been changed in the different versions.
 license.txt             The license this project is released under.
 circuit/                Directory with circuit diagrams in PDF and PNG formats.
 usbdrv/                 Directory with the AVR-USB driver and docs.
-keymaps/                Keyboard maps.
+keymaps/                Keyboard maps (chord maps).
 Makefile                Build instructions for GNU Make.
 main.c                  Main source code file.
 main.hex                Compiled version, ready to be programmed into uC.
@@ -139,4 +139,4 @@ The SpiffChorder project and documentation is Copyright (C) 2006-2008
 by Mikkel Holm Olsen (AKA Spaceman Spiff). More information about the
 project can be found on http://symlink.dk/projects/spiffchorder/.
 
-$Id: $
+$Id$

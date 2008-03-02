@@ -3,15 +3,15 @@
 # $Id::                                                           $ #
 # Version 0.98                                                      #
 #####################################################################
-# c64key is Copyright (C) 2006-2008 Mikkel Holm Olsen               #
-# based on WinAVR Makefile Template written by Eric B. Weddington,  #
-# Jörg Wunsch, et al.                                               #
+# SpiffChorder is Copyright (C) 2006-2008 Mikkel Holm Olsen         #
+# based on HID-Test by Christian Starkjohann, Objective Development #
 #####################################################################
-# Spaceman Spiff's Commodire 64 USB Keyboard (c64key for short) is  #
-# is free software; you can redistribute it and/or modify it under  #
-# the terms of the OBDEV license, as found in the licence.txt file. #
+# Spaceman Spiff's Chording Keyboard Experiment (SpiffChorder for   #
+# short) is free software; you can redistribute it and/or modify    #
+# it under the terms of the OBDEV license, as found in the          #
+# licence.txt file.                                                 #
 #                                                                   #
-# c64key is distributed in the hope that it will be useful,         #
+# SpiffChorder is distributed in the hope that it will be useful,   #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of    #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     #
 # OBDEV license for further details.                                #
@@ -51,7 +51,7 @@ KEYMAP = nasa_us.h
 
 
 # MCU name
-MCU = atmega8
+MCU = atmega168
 
 
 # Processor frequency.
@@ -210,7 +210,7 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 AVRDUDE_PROGRAMMER = stk500v2
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = com1    # programmer connected to serial device
+AVRDUDE_PORT = com3    # programmer connected to serial device
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
@@ -279,6 +279,7 @@ SIZE = avr-size
 NM = avr-nm
 AVRDUDE = avrdude
 REMOVE = rm -f
+RMDIR = rmdir
 COPY = cp
 WINSHELL = cmd
 
@@ -300,7 +301,7 @@ MSG_LINKING = Linking:
 MSG_COMPILING = Compiling:
 MSG_ASSEMBLING = Assembling:
 MSG_CLEANING = Cleaning project:
-
+MSG_CLEAN_HEX = Cleaning HEX-files:
 
 
 
@@ -375,10 +376,10 @@ program: $(TARGET).hex $(TARGET).eep
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM) $(AVRDUDE_LOCKBITS)
 
 # Set fuses.
-# For ATmega8: boot flash 128 words, BODlevel=2.7V, BOD enabled,
-# External crystal 1K CK + 4ms startup
+# For ATmega168: boot flash 1024 words, BODlevel=4.3V,
+# External crystal 258 CK + 4.1ms startup
 fuse:
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -U hfuse:w:0xDF:m -U lfuse:w:0xBE:m
+	$(AVRDUDE) $(AVRDUDE_FLAGS) -U hfuse:w:0xDC:m -U lfuse:w:0xCE:m
 
 # Generate avr-gdb config/init file which does the following:
 #     define the reset signal, load the target file, connect to target, and set 
@@ -496,13 +497,18 @@ main.o : main.c Makefile
 
 
 # Target: clean project.
-clean: begin clean_list end
+clean: begin clean_hex clean_list end
+distclean: begin clean_list end
+
+clean_hex :
+	@echo
+	@echo $(MSG_CLEAN_HEX)
+	$(REMOVE) $(TARGET).hex
+	$(REMOVE) $(TARGET).eep
 
 clean_list :
 	@echo
 	@echo $(MSG_CLEANING)
-	$(REMOVE) $(TARGET).hex
-	$(REMOVE) $(TARGET).eep
 	$(REMOVE) $(TARGET).cof
 	$(REMOVE) $(TARGET).elf
 	$(REMOVE) $(TARGET).map
@@ -513,7 +519,7 @@ clean_list :
 	$(REMOVE) $(SRC:.c=.s)
 	$(REMOVE) $(SRC:.c=.d)
 	$(REMOVE) .dep/*
-
+	$(RMDIR) .dep
 
 
 # Include the dependency files.

@@ -4,6 +4,7 @@ Changelog for Spaceman Spiff's Chording Keyboard Experiment
 Version 0.98 - Current pre-release
 ----------------------------------
 
+ * Switched to ATmega168 for more Flash.
  * Changed key tables to 16-bits. Allows modifiers directly in keymaps.
 
 
@@ -42,3 +43,5 @@ Initial. Mostly working original feature set.
  * switch debouncing with counter.
  * Modifier keys working - modifier locks unused.
  * Boot protocol compatible.
+
+$Id$

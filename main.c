@@ -1,5 +1,5 @@
 /*********************************************************************
- * main.c - Main firmware (ATmega8 version)                          *
+ * main.c - Main firmware                                            *
  * Version 0.98                                                      *
  * $Id::                                                           $ *
  *********************************************************************
@@ -29,7 +29,7 @@
 #include "oddebug.h"
 
 /* Hardware documentation:
- * ATmega-8 @12.000 MHz
+ * ATmega168 @12.000 MHz
  *
  * PB0     : Pinky key
  * PB1     : Ring finger key
@@ -41,10 +41,14 @@
  * PC0     : Near LED
  * PC1     : Center LED
  * PC2     : Far LED
+ * PC3     : Unused modifier 1
+ * PC4     : Unused modifier 2
+ * PC5     : Unused modifier 3
  * PD0     : D- USB negative (needs appropriate zener-diode and resistors)
  * PD1     : UART TX
  * PD2/INT0: D+ USB positive (needs appropriate zener-diode and resistors)
  * PD6     : Far thumb
+ * PD7     : Extra chord button (unused)
  *
  * USB Connector:
  * -------------
@@ -159,26 +163,44 @@ static void hardwareInit(void) {
   PORTB = 0x3F;   /* Enable pull-ups */
   DDRB  = 0x00;   /* Port B are switch inputs */
 
-  PORTC = 0x00;   /* LEDs on PC0..PC2 */
-  DDRC  = 0x07;   /* PC0..PC2 are outputs */
+  PORTC = 0x38;   /* LEDs on PC0..PC2, switches on PC3..PC5 */
+  DDRC  = 0x07;   /* PC0..PC2 are outputs, PC3..PC5 are inputs */
   
   PORTD = 0xfa;   /* 1111 1010 bin: activate pull-ups except on USB lines */
   DDRD  = 0x07;   /* 0000 0111 bin: all pins input except USB (-> USB reset) */
 
   /* USB Reset by device only required on Watchdog Reset */
-  _delay_us(11);   /* delay >10ms for USB reset */ 
+  _delay_us(11);  /* delay >10ms for USB reset */ 
 
   DDRD = 0x02;    /* 0000 0010 bin: remove USB reset condition */
+
+#if defined (__AVR_ATmega168__)
+# define TIFR_REG TIFR0 
+# define CMA_VECT TIMER2_COMPA_vect
   /* configure timer 0 for a rate of 12M/(1024 * 256) = 45.78 Hz (~22ms) */
-  TCCR0 = 5;      /* timer 0 prescaler: 1024 */
-  
-  /* configure timer 0 for a rate of 12M/(256 * 47) = 997.3 Hz (~1ms) */
+  TCCR0A = 0;     /* Normal Mode, OC disabled */
+  TCCR0B = 5;     /* timer 0 prescaler: 1024 */
+  /* configure timer 2 for a rate of 12M/(256 * 47) = 997.3 Hz (~1ms) */
+  OCR2A = 47;
+  TCCR2A = (1<<WGM21); /* CTC-mode */
+  TCCR2B = (6<<CS20);  /* prescaler=256 */
+  TIMSK2|=(1<<OCIE2A);  /* Enable compare match interrupt */
+#elif defined (__AVR_ATmega8__)
+# define TIFR_REG TIFR
+# define CMA_VECT TIMER2_COMP_vect
+  /* configure timer 0 for a rate of 12M/(1024 * 256) = 45.78 Hz (~22ms) */
+  TCCR0 = 5;           /* timer 0 prescaler: 1024 */
+  /* configure timer 2 for a rate of 12M/(256 * 47) = 997.3 Hz (~1ms) */
   OCR2 = 47;
   TCCR2 = (1<<WGM21)|(6<<CS20); /* CTC-mode, prescaler=256 */
-  TIMSK|=(1<<OCIE2); /* Enable compare match interrupt */
+  TIMSK|=(1<<OCIE2);   /* Enable compare match interrupt */
+#else
+#error Selected microcontroller not supported
+#endif
+
 }
 
-ISR(TIMER2_COMP_vect) {
+ISR(CMA_VECT) {
   /* This gets called every 1ms and updates the button debounce counter */
   if (debounce>1) {
     --debounce;
@@ -396,8 +418,8 @@ int main(void) {
     }
 
     /* Check timer if we need periodic reports */
-    if (TIFR & (1<<TOV0)) {
-      TIFR = 1<<TOV0; /* Reset flag */
+    if (TIFR_REG & (1<<TOV0)) {
+      TIFR_REG = 1<<TOV0; /* Reset flag */
       if (key_repeat>REP_STATE_TIMEOUT) {
         --key_repeat;
       }
