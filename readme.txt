@@ -8,8 +8,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
 OBDEV license for further details.
                                                               
-This is a pre-release of 0.98. Please do not distribute.
-
 Spaceman Spiff's Chording Keyboard Experiment (or SpiffChorder for short)
 is an experimental platform for creating a USB chording keyboard. A
 chording keyboard or Chorded keyboard is an input device where characters
@@ -18,6 +16,15 @@ is the 7-key chorder, where one key is used for each of the index finger,
 middle finger, ring finger and pinky, and 3 keys for the thumb. This can 
 be used with either the left or right hand (or a chorder can be used for 
 each hand, effectively doubling the typing speed).
+
+For the latest information regarding the SpiffChorder, check the 
+project homepage:
+
+  http://symlink.dk/projects/spiffchorder/
+
+and the wiki:
+
+  http://chorder.cs.vassar.edu/spiffchorder/forside
 
 Both the hardware design and software/firmware for the SpiffChorder
 is open, and you can make modifications as you see fit. The license is 
@@ -97,10 +104,10 @@ uses avrdude to set the fuses for the device (provided the avrdude
 settings in the Makefile have been configured in an appropriate way).
 
 Be aware that the firmware provided here does not use OBDEV's USB 
-vendor ID, since this may not be used for HID devices. Instead John 
-Hyde's VID is used (same as OBDEV's HIDkeys example). John has aggreed
-that his VID can be used for educational purposes, so please MAKE SURE
-THIS FIRMWARE DOES NOT ESCAPE YOUR LAB (or get a different VID).
+vendor ID, since this may not be used for HID devices. Instead a
+sepearte VID/PID-pair has been acquired for the SpiffChorder. You may
+use this PID freely for SpiffChorders, even when changing the chord
+mappings or function of the code.
 
 
 Files

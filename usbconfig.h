@@ -115,18 +115,28 @@ the newest features and options.
 /* -------------------------- Device Description --------------------------- */
 
 /* We cannot use Obdev's free shared VID/PID pair because this is a HID.
- * We use John Hyde's VID (author of the book "USB Design By Example") for
- * this example instead. John has offered this VID for use by students for
- * non-commercial devices. Well... This example is for demonstration and
- * education only... DO NOT LET DEVICES WITH THIS VID ESCAPE YOUR LAB!
- * The Product-ID is a random number.
+ * Vendor ID 0x1C40 belongs to EzPrototypes.com, who sell smaller ranges
+ * of PIDs.
+ * The product/device ID (PID) of the SpiffChorder is 0x05A3. This PID 
+ * belongs to Mikkel Holm Olsen AKA Spaceman Spiff. You may use this VID/PID
+ * pair for building SpiffChorders, using either the official code, or code
+ * with any modifications you want, as long as the device is still a HID 
+ * device, and using the same report descriptor, i.e. is still a boot 
+ * protocol keyboard device. As long as this is true, there should be no 
+ * problems regarding different devices requiring different drivers.
+ * If you need to make other changes, you will have to get your own PID! 
+ * The PID allows use of the product, but does not grant right to use the 
+ * USB logo etc. Also, since the implementation cannot live up to the 
+ * electrical specifications, it will not be possible to actually get 
+ * this device USB certified.
+ * 
  */
-#define  USB_CFG_VENDOR_ID  0x42, 0x42
+#define  USB_CFG_VENDOR_ID  0x40, 0x1C
 /* USB vendor ID for the device, low byte first. If you have registered your
  * own Vendor ID, define it here. Otherwise you use obdev's free shared
  * VID/PID pair. Be sure to read USBID-License.txt for rules!
  */
-#define  USB_CFG_DEVICE_ID  0x0l, 0xf0
+#define  USB_CFG_DEVICE_ID  0xA3, 0x05
 /* This is the ID of the product, low byte first. It is interpreted in the
  * scope of the vendor ID. If you have registered your own VID with usb.org
  * or if you have licensed a PID from somebody else, define it here. Otherwise
