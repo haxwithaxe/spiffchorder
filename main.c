@@ -200,6 +200,7 @@ static void hardwareInit(void) {
 
 }
 
+/* Timer 2 interrupt handler - decrease debounce counter every 1ms */
 ISR(CMA_VECT) {
   /* This gets called every 1ms and updates the button debounce counter */
   if (debounce>1) {
@@ -236,8 +237,8 @@ unsigned char process_chord(uchar chord) {
   special_keymap=NULL;
   if (key>=DIV_Mods) { // This is not a standard key
     if (key>=DIV_Multi) { // Either Multi or Special
-      if (key>=DIV_Special) { /* Special Key */
-        pendingPtr=(const uint8_t*)pgm_read_word(&special_strings[key-DIV_Special]);
+      if (key>=DIV_Macro) { /* Special Key */
+        pendingPtr=(const uint8_t*)pgm_read_word(&macro_strings[key-DIV_Macro]);
         //mod_state&=mod_lock; 
         if (!lock_mode) { // Reset mode unless it was locked
           current_keymap=keymap_default;

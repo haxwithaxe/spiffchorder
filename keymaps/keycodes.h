@@ -138,6 +138,7 @@ enum keycodes {
   KEY_KP0,
   KEY_KPcomma,
   KEY_Euro2,
+
 /* The following are not standard USB HID, but are the modifier keys,
    handeled specially in decoding and mapped to the modifier byte in
    the USB report */
@@ -150,6 +151,7 @@ enum keycodes {
   MOD_RSHIFT,           // 0x20
   MOD_RALT,             // 0x40
   MOD_RGUI,             // 0x80
+
 /* Next comes the mode change codes */
   DIV_Modes,
   MODE_RESET=DIV_Modes, // Reset (Default mode)
@@ -158,15 +160,17 @@ enum keycodes {
   MODE_NUMLCK,          // Number/symbols lock
   MODE_FUNC,            // Function key mode
   MODE_FUNCLCK,         // Function key lock
+
 /* Then a special mode for both num/sym and shift */
   DIV_Multi,
   MULTI_NumShift=DIV_Multi,
-/* And finally special keys that do not generate normal keypresses */
-  DIV_Special,
-  SPC_000=DIV_Special,  // 000
-  SPC_00,               // 00
-  SPC_quotes,           // "" and left arrow
-  SPC_parens,           // () and left arrow
+
+/* And finally macros, that generate multiple key presses */
+  DIV_Macro,
+  MACRO_000=DIV_Macro,  // 000
+  MACRO_00,             // 00
+  MACRO_quotes,         // "" and left arrow
+  MACRO_parens,         // () and left arrow
   DIV_Last
 };
 
@@ -183,22 +187,22 @@ enum modifiers {
 
 
 /*********************************************************************************
- * Special key strings defined here - lower bits are key-codes, most significant *
+ * Macro strings defined here - lower bits are key-codes, most significant       *
  * bit is converted to shift.                                                    *
  *********************************************************************************/
-const unsigned char SpStr_000[] PROGMEM = { KEY_0, KEY_0, KEY_0, 0};
-const unsigned char SpStr_00[] PROGMEM = { KEY_0, KEY_0, 0};
-const unsigned char SpStr_quotes[] PROGMEM = { 0x80+KEY_ping, 0x80+KEY_ping, KEY_larr, 0};
-const unsigned char SpStr_parens[] PROGMEM = { 0x80+KEY_9, 0x80+KEY_0, KEY_larr, 0};
+const unsigned char MStr_000[] PROGMEM = { KEY_0, KEY_0, KEY_0, 0};
+const unsigned char MStr_00[] PROGMEM = { KEY_0, KEY_0, 0};
+const unsigned char MStr_quotes[] PROGMEM = { 0x80+KEY_ping, 0x80+KEY_ping, KEY_larr, 0};
+const unsigned char MStr_parens[] PROGMEM = { 0x80+KEY_9, 0x80+KEY_0, KEY_larr, 0};
 
 /************************************************************************************
- * Array of the special key strings. Order must be the same as in the keycodes enum *
+ * Array of the macro strings. Order must be the same as in the keycodes enum       *
  ************************************************************************************/
-const unsigned char *special_strings[DIV_Last-DIV_Special] PROGMEM = {
-  SpStr_000,
-  SpStr_00,
-  SpStr_quotes,
-  SpStr_parens,
+const unsigned char *macro_strings[DIV_Last-DIV_Macro] PROGMEM = {
+  MStr_000,
+  MStr_00,
+  MStr_quotes,
+  MStr_parens,
 };
 
 #endif
