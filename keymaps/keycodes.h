@@ -166,13 +166,7 @@ enum keycodes {
   SPC_000=DIV_Special,  // 000
   SPC_00,               // 00
   SPC_quotes,           // "" and left arrow
-//  SPC_dollar,           // $
-//  SPC_percent,          // %
-//  SPC_ampersand,        // &
-//  SPC_question,         // ?
   SPC_parens,           // () and left arrow
-//  SPC_ast,              // * (Shift-8)
-//  SPC_plus,             // + (Shift-=)
   DIV_Last
 };
 
@@ -195,13 +189,7 @@ enum modifiers {
 const unsigned char SpStr_000[] PROGMEM = { KEY_0, KEY_0, KEY_0, 0};
 const unsigned char SpStr_00[] PROGMEM = { KEY_0, KEY_0, 0};
 const unsigned char SpStr_quotes[] PROGMEM = { 0x80+KEY_ping, 0x80+KEY_ping, KEY_larr, 0};
-//const unsigned char SpStr_dollar[] PROGMEM = { 0x80+KEY_4, 0};
-//const unsigned char SpStr_percent[] PROGMEM = { 0x80+KEY_5, 0};
-//const unsigned char SpStr_ampersand[] PROGMEM = { 0x80+KEY_7, 0};
-//const unsigned char SpStr_question[] PROGMEM = { 0x80+KEY_slash, 0};
 const unsigned char SpStr_parens[] PROGMEM = { 0x80+KEY_9, 0x80+KEY_0, KEY_larr, 0};
-//const unsigned char SpStr_ast[] PROGMEM = { 0x80+KEY_8, 0};
-//const unsigned char SpStr_plus[] PROGMEM = { 0x80+KEY_equal, 0};
 
 /************************************************************************************
  * Array of the special key strings. Order must be the same as in the keycodes enum *
@@ -210,14 +198,7 @@ const unsigned char *special_strings[DIV_Last-DIV_Special] PROGMEM = {
   SpStr_000,
   SpStr_00,
   SpStr_quotes,
-//  SpStr_dollar,
-//  SpStr_percent,
-//  SpStr_ampersand,
-//  SpStr_question,
   SpStr_parens,
-//  SpStr_ast,
-//  SpStr_plus
 };
-
 
 #endif
