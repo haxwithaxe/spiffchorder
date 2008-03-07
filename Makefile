@@ -376,10 +376,10 @@ program: $(TARGET).hex $(TARGET).eep
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM) $(AVRDUDE_LOCKBITS)
 
 # Set fuses.
-# For ATmega168: boot flash 1024 words, BODlevel=4.3V,
-# External crystal 258 CK + 4.1ms startup
+# For ATmega168: boot flash 1024 words, BODlevel=2.7V,
+# External crystal 8.0MHz+ 16K CK/14 CK + 65ms startup
 fuse:
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -U hfuse:w:0xDC:m -U lfuse:w:0xCE:m
+	$(AVRDUDE) $(AVRDUDE_FLAGS) -U hfuse:w:0xDD:m -U lfuse:w:0xFF:m
 
 # Generate avr-gdb config/init file which does the following:
 #     define the reset signal, load the target file, connect to target, and set 
