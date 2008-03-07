@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
- * This Revision: $Id: usbconfig-prototype.h 387 2007-08-07 09:08:12Z cs $
+ * This Revision: $Id: usbconfig-prototype.h 532 2008-02-28 15:35:05Z cs $
  */
 
 #ifndef __usbconfig_h_included__
@@ -35,7 +35,11 @@ rename it to "usbconfig.h". Then edit it accordingly.
 #define USB_CFG_DPLUS_BIT       2
 /* This is the bit number in USB_CFG_IOPORT where the USB D+ line is connected.
  * This may be any bit in the port. Please note that D+ must also be connected
- * to interrupt pin INT0!
+ * to interrupt pin INT0! [You can also use other interrupts, see section
+ * "Optional MCU Description" below, or you can connect D- to the interrupt, as
+ * it is required if you use the USB_COUNT_SOF feature. If you use D- for the
+ * interrupt, the USB interrupt will also be triggered at Start-Of-Frame
+ * markers every millisecond.]
  */
 /* #define USB_CFG_CLOCK_KHZ       (F_CPU/1000) */
 /* Clock rate of the AVR in MHz. Legal values are 12000, 15000, 16000 or 16500.
@@ -63,12 +67,22 @@ rename it to "usbconfig.h". Then edit it accordingly.
 
 #define USB_CFG_HAVE_INTRIN_ENDPOINT    1
 /* Define this to 1 if you want to compile a version with two endpoints: The
- * default control endpoint 0 and an interrupt-in endpoint 1.
+ * default control endpoint 0 and an interrupt-in endpoint (any other endpoint
+ * number).
  */
 #define USB_CFG_HAVE_INTRIN_ENDPOINT3   0
 /* Define this to 1 if you want to compile a version with three endpoints: The
- * default control endpoint 0, an interrupt-in endpoint 1 and an interrupt-in
- * endpoint 3. You must also enable endpoint 1 above.
+ * default control endpoint 0, an interrupt-in endpoint 3 (or the number
+ * configured below) and a catch-all default interrupt-in endpoint as above.
+ * You must also define USB_CFG_HAVE_INTRIN_ENDPOINT to 1 for this feature.
+ */
+#define USB_CFG_EP3_NUMBER              3
+/* If the so-called endpoint 3 is used, it can now be configured to any other
+ * endpoint number (except 0) with this macro. Default if undefined is 3.
+ */
+/* #define USB_INITIAL_DATATOKEN           USBPID_DATA0 */
+/* The above macro defines the startup condition for data toggling on the
+ * interrupt/bulk endpoints 1 and 3. Defaults to USBPID_DATA0.
  */
 #define USB_CFG_IMPLEMENT_HALT          0
 /* Define this to 1 if you also want to implement the ENDPOINT_HALT feature
@@ -102,14 +116,40 @@ rename it to "usbconfig.h". Then edit it accordingly.
  * usbFunctionSetup(). This saves a couple of bytes.
  */
 #define USB_CFG_IMPLEMENT_FN_WRITEOUT   0
-/* Define this to 1 if you want to use interrupt-out (or bulk out) endpoint 1.
+/* Define this to 1 if you want to use interrupt-out (or bulk out) endpoints.
  * You must implement the function usbFunctionWriteOut() which receives all
- * interrupt/bulk data sent to endpoint 1.
+ * interrupt/bulk data sent to any endpoint other than 0. The endpoint number
+ * can be found in 'usbRxToken'.
  */
 #define USB_CFG_HAVE_FLOWCONTROL        0
 /* Define this to 1 if you want flowcontrol over USB data. See the definition
  * of the macros usbDisableAllRequests() and usbEnableAllRequests() in
  * usbdrv.h.
+ */
+/* #define USB_RX_USER_HOOK(data, len)     if(usbRxToken == (uchar)USBPID_SETUP) blinkLED(); */
+/* This macro is a hook if you want to do unconventional things. If it is
+ * defined, it's inserted at the beginning of received message processing.
+ * If you eat the received message and don't want default processing to
+ * proceed, do a return after doing your things. One possible application
+ * (besides debugging) is to flash a status LED on each packet.
+ */
+/* #define USB_RESET_HOOK(resetStarts)     if(!resetStarts){hadUsbReset();} */
+/* This macro is a hook if you need to know when an USB RESET occurs. It has
+ * one parameter which distinguishes between the start of RESET state and its
+ * end.
+ */
+/* #define USB_SET_ADDRESS_HOOK()              hadAddressAssigned(); */
+/* This macro (if defined) is executed when a USB SET_ADDRESS request was
+ * received.
+ */
+#define USB_COUNT_SOF                   0
+/* define this macro to 1 if you need the global variable "usbSofCount" which
+ * counts SOF packets. This feature requires that the hardware interrupt is
+ * connected to D- instead of D+.
+ */
+#define USB_CFG_HAVE_MEASURE_FRAME_LENGTH   0
+/* define this macro to 1 if you want the function usbMeasureFrameLength()
+ * compiled in. This function can be used to calibrate the AVR's RC oscillator.
  */
 
 /* -------------------------- Device Description --------------------------- */

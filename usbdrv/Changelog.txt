@@ -158,3 +158,59 @@ Scroll down to the bottom to see the most recent changes.
     wants to use a different hardware interrupt than INT0.
 
 * Release 2007-08-07
+
+  - Moved handleIn3 routine in usbdrvasm16.S so that relative jump range is
+    not exceeded.
+  - More config options: USB_RX_USER_HOOK(), USB_INITIAL_DATATOKEN,
+    USB_COUNT_SOF
+  - USB_INTR_PENDING can now be a memory address, not just I/O
+
+* Release 2007-09-19
+
+  - Split out common parts of assembler modules into separate include file
+  - Made endpoint numbers configurable so that given interface definitions
+    can be matched. See USB_CFG_EP3_NUMBER in usbconfig-prototype.h.
+  - Store endpoint number for interrupt/bulk-out so that usbFunctionWriteOut()
+    can handle any number of endpoints.
+  - Define usbDeviceConnect() and usbDeviceDisconnect() even if no
+    USB_CFG_PULLUP_IOPORTNAME is defined. Directly set D+ and D- to 0 in this
+    case.
+
+* Release 2007-12-01
+
+  - Optimize usbDeviceConnect() and usbDeviceDisconnect() for less code size
+    when USB_CFG_PULLUP_IOPORTNAME is not defined.
+
+* Release 2007-12-13
+
+  - Renamed all include-only assembler modules from *.S to *.inc so that
+    people don't add them to their project sources.
+  - Distribute leap bits in tx loop more evenly for 16 MHz module.
+  - Use "macro" and "endm" instead of ".macro" and ".endm" for IAR
+  - Avoid compiler warnings for constant expr range by casting some values in
+    USB descriptors.
+
+* Release 2008-01-21
+
+  - Fixed bug in 15 and 16 MHz module where the new address set with
+    SET_ADDRESS was already accepted at the next NAK or ACK we send, not at
+    the next data packet we send. This caused problems when the host polled
+    too fast. Thanks to Alexander Neumann for his help and patience debugging
+    this issue!
+
+* Release 2008-02-05
+
+  - Fixed bug in 16.5 MHz module where a register was used in the interrupt
+    handler before it was pushed. This bug was introduced with version
+    2007-09-19 when common parts were moved to a separate file.
+  - Optimized CRC routine (thanks to Reimar Doeffinger).
+
+* Release 2008-02-16
+
+  - Removed outdated IAR compatibility stuff (code sections).
+  - Added hook macros for USB_RESET_HOOK() and USB_SET_ADDRESS_HOOK().
+  - Added optional routine usbMeasureFrameLength() for calibration of the
+    internal RC oscillator.
+
+* Release 2008-02-28
+

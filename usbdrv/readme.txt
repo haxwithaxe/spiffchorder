@@ -23,13 +23,10 @@ The driver consists of the following files:
                            a stub and includes one of the usbdrvasm*.S files
                            depending on processor clock. Link this module to
                            your code!
-  usbdrvasm12.S .......... 12 MHz version of the assembler routines. Included
-                           by usbdrvasm.S, don't link it directly!
-  usbdrvasm16.S .......... 16 MHz version of the assembler routines. Included
-                           by usbdrvasm.S, don't link it directly!
-  usbdrvasm165.S ......... 16.5 MHz version of the assembler routines including
-                           a PLL so that an 1% accurate RC oscillator can be
-                           used. Included by usbdrvasm.S, don't link directly!
+  usbdrvasm*.inc ......... Assembler routines for particular clock frequencies.
+                           Included by usbdrvasm.S, don't link it directly!
+  asmcommon.inc .......... Common assembler routines. Included by
+                           usbdrvasm*.inc, don't link it directly!
   usbconfig-prototype.h .. Prototype for your own usbdrv.h file.
 * oddebug.c .............. Debug functions. Only used when DEBUG_LEVEL is
                            defined to a value greater than 0. Link this module
@@ -49,13 +46,18 @@ The driver consists of the following files:
 
 CPU CORE CLOCK FREQUENCY
 ========================
-We supply assembler modules for clock frequencies of 12 MHz, 16 MHz and
+We supply assembler modules for clock frequencies of 12 MHz, 15 MHz, 16 MHz and
 16.5 MHz. Other clock rates are not supported. The actual clock rate must be
 configured in usbdrv.h unless you use the default 12 MHz.
 
 12 MHz Clock
 This is the traditional clock rate of AVR-USB because it's the lowest clock
 rate where the timing constraints of the USB spec can be met.
+
+15 MHz Clock
+Similar to 12 MHz, but some NOPs inserted. On the other hand, the higher clock
+rate allows for some loops which make the resulting code size somewhat smaller
+than the 12 MHz version.
 
 16 MHz Clock
 This clock rate has been added for users of the Arduino board and other
@@ -76,9 +78,9 @@ ATTiny26.
 
 We recommend that you obtain appropriate calibration values for 16.5 MHz core
 clock at programming time and store it in flash or EEPROM or compute the value
-from a reference clock at run time. However, since Atmel's 8 MHz calibration
-is much more precise than the guaranteed 10%, it's usually possible to add a
-fixed offset to this value.
+from a reference clock at run time. Atmel's 8 MHz calibration is much more
+precise than the guaranteed 10% and it's therefore often possible to work with
+a fixed offset from this value, but it may be out of range.
 
 
 USB IDENTIFIERS
@@ -112,13 +114,13 @@ Windows host driver (not based on libusb) for Human Interface Devices.
 DEVELOPMENT SYSTEM
 ==================
 This driver has been developed and optimized for the GNU compiler version 3
-(gcc 3). It does work well with gcc 4 and future versions will probably be
-optimized for gcc 4. We recommend that you use the GNU compiler suite because
-it is freely available. AVR-USB has also been ported to the IAR compiler and
-assembler. It has been tested with IAR 4.10B/W32 and 4.12A/W32 on an ATmega8
-with the "small" and "tiny" memory model. Please note that gcc is more
-efficient for usbdrv.c because this module has been deliberately optimized
-for gcc.
+(gcc 3). It does work well with gcc 4, but with bigger code size. We recommend
+that you use the GNU compiler suite because it is freely available. AVR-USB
+has also been ported to the IAR compiler and assembler. It has been tested
+with IAR 4.10B/W32 and 4.12A/W32 on an ATmega8 with the "small" and "tiny"
+memory model. Not every release is tested with IAR CC and the driver may
+therefore fail to compile with IAR. Please note that gcc is more efficient for
+usbdrv.c because this module has been deliberately optimized for gcc.
 
 
 USING AVR-USB FOR FREE
