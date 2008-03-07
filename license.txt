@@ -1,3 +1,5 @@
+$Id$
+
 Spaceman Spiff's Chording Keyboard Experiment is based on the HIDkeys 
 application of Objective Development Software GmbH, and their 
 distributed AVR-USB firmware only driver. The directory usbdrv 
