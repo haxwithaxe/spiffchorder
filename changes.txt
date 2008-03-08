@@ -3,11 +3,6 @@ Changelog for Spaceman Spiff's Chording Keyboard Experiment
 This pre-release is for people to test the overall functions, before
 making the truely public release of version 1.00.
 
-There are two bugs that will be fixed before the v1.00 release:
-1) Repeat does not generate correct keyup in all cases:
-     leads to ===================e
-2) When using a macro, the mode is not cleared.
-
 Other than that, there are a few things that will soon be 
 implemented:
 1) On/Off-function.
@@ -18,9 +13,12 @@ It has not yet been decided if these will be implemented before or after
 the release of version 1.00.
 
 
-Version 0.98 - Current pre-release
+Version 0.98 - released 2008-03-08
 ----------------------------------
 
+ * Bugfix: Repeat no longer generates wrong character at end (======e).
+ * Bugfix: Clear modifiers after playing back macro.
+ * Bugfix: Clear state after doing extended key.
  * Got proper VID/PID-pair for SpiffChorder.
  * Switched to ATmega168 for more Flash.
  * Changed key tables to 16-bits. Allows modifiers directly in keymaps.

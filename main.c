@@ -212,7 +212,7 @@ ISR(CMA_VECT) {
 uchar mod_state=0, mod_lock=0;
 
 /* The current mode and whether to lock the mode or only apply it to one keypress */
-uchar current_mode=0, lock_mode=0;
+uchar current_mode=0, lock_mode=0, last_modifiers=0;
 
 /* Used to send the key_up event */
 const uint8_t PROGMEM key_up[] = {0};
@@ -220,13 +220,11 @@ const uint8_t PROGMEM key_up[] = {0};
 /* This pointer tells us something needs to be sent before returning to keyboard scanning */
 const uint8_t *pendingPtr = key_up;
 
+/* Handle a chord */
 unsigned char process_chord(uchar chord) {
+  uint8_t key;
 #ifdef KEYMAP_USES_MODIFIERS
   keymap_t keymods;
-#endif
-  uint8_t key;
-  memset(reportBuffer,0,sizeof(reportBuffer)); /* Clear report buffer */
-#ifdef KEYMAP_USES_MODIFIERS
   keymods=pgm_read_word(special_keymap?&special_keymap[chord&0x7F]:
                     &current_keymap[chord&0x7F]);
   key=(uint8_t)keymods; /* typecast masks off upper bits */
@@ -236,10 +234,10 @@ unsigned char process_chord(uchar chord) {
 #endif
   special_keymap=NULL;
   if (key>=DIV_Mods) { // This is not a standard key
-    if (key>=DIV_Multi) { // Either Multi or Special
-      if (key>=DIV_Macro) { /* Special Key */
+    if (key>=DIV_Multi) { // Either Multi-mode or Macro
+      if (key>=DIV_Macro) { /* Macro */
         pendingPtr=(const uint8_t*)pgm_read_word(&macro_strings[key-DIV_Macro]);
-        //mod_state&=mod_lock; 
+        mod_state&=mod_lock; 
         if (!lock_mode) { // Reset mode unless it was locked
           current_keymap=keymap_default;
           current_mode=0;
@@ -262,7 +260,9 @@ unsigned char process_chord(uchar chord) {
   }
 
   if (key) {
+    memset(reportBuffer,0,sizeof(reportBuffer)); /* Clear report buffer */
     reportBuffer[2]=key;
+
 #ifdef KEYMAP_USES_MODIFIERS
     key=keymods>>8;
     if (key) {
@@ -271,21 +271,25 @@ unsigned char process_chord(uchar chord) {
 #endif
     {
       reportBuffer[0]=mod_state;
-      mod_state&=mod_lock;
-      if (!lock_mode) {
-        current_keymap=keymap_default;
-        current_mode=0;
-      }
     }
+    last_modifiers=reportBuffer[0]; /* Save the modifiers for proper clean-up on release */
+
+    mod_state&=mod_lock;
+    if (!lock_mode) {
+      current_keymap=keymap_default;
+      current_mode=0;
+    }
+    return 1;
   }
-  return 1;
+  return 0;
 }
 
-
+/* When the state of keys change, handle key-down or key-up */
 uchar key_change(uchar data, uchar timeout) {
   static uchar latched=0xFF, adding=0;
   uchar retval=0;
   if (timeout) {
+    // If the same chord has been held for an amount of time - send key-down - repeat starts
     if (adding) retval=process_chord(~latched);
   } else {
     if (latched & ~data) { // buttons(s) pressed
@@ -294,7 +298,7 @@ uchar key_change(uchar data, uchar timeout) {
       key_repeat=repeat_value;
     } else if (~latched & data) { // buttons(s) released
       if (use_early_detect?adding:data==0xFF) {
-        retval=process_chord(~latched);
+        if (key_repeat!=REP_STATE_KEYDOWN_SENT) retval=process_chord(~latched);
         latched=data;
         adding=0;
       }
@@ -338,6 +342,7 @@ unsigned char getCharFromPending(void) {
   static char state=0, kval=0;
   memset(reportBuffer,0,sizeof(reportBuffer)); /* Clear report buffer */
   if (state) {
+    reportBuffer[0]=last_modifiers;
     state=0;
   } else {
     kval=pgm_read_byte(pendingPtr);
