@@ -49,8 +49,7 @@
 # The keyboard map to use, e.g. nasa_us.h
 KEYMAP = nasa_us.h
 
-
-# MCU name
+# MCU name. Default: atmega168. Also supported atmega8.
 MCU = atmega168
 
 
@@ -67,11 +66,11 @@ FORMAT = ihex
 
 
 # Target file name (without extension).
-TARGET = main
+TARGET = spiffchorder
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = usbdrv/usbdrv.c usbdrv/oddebug.c $(TARGET).c 
+SRC = usbdrv/usbdrv.c usbdrv/oddebug.c main.c 
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -525,9 +524,7 @@ clean_list :
 # Include the dependency files.
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
 
-
 # Listing of phony targets.
 .PHONY : all begin finish end sizebefore sizeafter gccversion \
-build elf hex eep lss sym coff extcoff \
-clean clean_list program debug gdb-config
-
+	build elf hex eep lss sym coff extcoff \
+	clean clean_list program debug gdb-config
