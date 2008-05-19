@@ -13,10 +13,43 @@ OBDEV license for further details.
 Spaceman Spiff's Chording Keyboard Experiment
 =============================================
 
-This document will eventually contain more detailed documentation of the
-structure of the software and hardware, useful for people who want to make
-modifications to the system.
+This document contains more detailed documentation regarding the 
+structure of the software and hardware, useful for people who want
+to make modifications to the system.
 
+
+Hardware overview
+-----------------
+
+The standard configuration of the SpiffChorder hardware is shown in
+circuit/chorder.png and circuit/chorder.pdf. Component values are
+described in the bill of materials circuit/bom.txt.
+
+The design of the SpiffChorder allows 8 chord buttons as well as 3
+modifiers. The idea is that the modifiers could be bound to a key
+such as shift, and affect all chords. In a future version of the
+firmware, which supports a trackball (or other pointing device), the
+modifiers will be used for mouse buttons. The 8 chord buttons (or
+7 in the standard configuration) are connected to PC0-PC5 and
+PD6-PD7). On the 28-pin devices, only PORTD has all 8 bits. But we
+need some of the bits in PORTD for other purposes (such as the
+interrupt for USB communication), so we must combine more than one
+port. By selecting the low 6 bits from PORTC and the high 2 bits
+from PORTD, the code to combine the inputs into a single byte
+representing the active chord is greatly simplified.
+
+SpiffChorder uses a USB reference design where the microcontroller
+is powered by 5V from the bus, and the signal levels on the USB
+lines are limited by 3.6V zener diodes. Although some people have
+made this circuit work without the zener diodes, this is not 
+recommended, because a fairly large percentage of motherboards will
+not tolerate the higher signal levels on the bus lines. The reason
+for choosing a 3.6V instead of 3.3V (which is the specified bus
+voltage level) is that this gets much closer to the specified voltage
+due to the current running through the zener. For this to work, 
+remember that the zeners should be low-power types (typically the
+glass-bead types, looking like 1N4148), in order to be sufficiently 
+fast. 
 
 
 Copyright (C) 2006-2008 by Mikkel Holm Olsen

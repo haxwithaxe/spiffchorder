@@ -5,21 +5,21 @@ This document contains the list of components required to build
 the SpiffChorder.
 
 C1, C2                  22pF ceramic capacitor.
-C3, C5                  100nF ceramic capacitor (decoupling).                
-C4                      10uF electrolytic capacitor, min. 10V.               
-CON1                    2x3 pin header, e.g. shrouded header from Harting.   
-CON2                    USB connector, alternatively cable with type-A plug. 
-CON3                    Connection to switches. Can be wired directly.       
-CON4                    Connection to LEDs. Optional.                        
-D1, D2                  3.6V zener-diode.                                    
-IC1                     Atmel ATmega168.                                       
-R1                      2.2 kOhm resistor.                                   
-R2                      4.7 kOhm resistor.                                   
-R3, R4                  82 Ohm resistor.                                     
-R5-R7                   LED current limiting resistors. About 1 kOhm,        
-                        depending on selected LEDs.                          
-R8-R18                  Optional pull-up resistors. 10 kOhm or 4.7 kOhm.     
-X1                      12.000 MHz crystal.                                  
+C3, C5                  100nF ceramic capacitor (decoupling).
+C4                      10uF electrolytic capacitor, min. 10V.
+CON1                    2x3 pin header, e.g. shrouded header from Harting.
+CON2                    USB connector, alternatively cable with type-A plug.
+CON3                    Connection to switches. Can be wired directly.
+CON4                    Connection to LEDs. Optional.
+D1, D2                  3.6V zener-diode.
+IC1                     Atmel ATmega168.
+R1                      2.2 kOhm resistor.
+R2                      4.7 kOhm resistor.
+R3, R4                  82 Ohm resistor.
+R5-R7                   LED current limiting resistors. About 1 kOhm,
+                        depending on selected LEDs.
+R8-R18                  Optional pull-up resistors. 10 kOhm or 4.7 kOhm.
+X1                      12.000 MHz crystal. (or 16.000MHz)
 
 
 NOTES:
@@ -28,7 +28,7 @@ NOTES:
  * CON1 is for in-system programming. If a socket is used for the ATmega168,
    this is not needed. Also, current implementations of the SpiffChorder
    allows the use of a boot loader working over the existing USB connection.
-   This allows the firmware to be updated without special programming 
+   This allows the firmware to be updated without special programming
    hardware. But the boot loader needs to be installed in the ATmega168 before
    it is soldered in place (unless the CON1 connector is mounted).
  * CON2 is a USB connector. Use either a type-B receptacle, in combination
@@ -37,22 +37,22 @@ NOTES:
    colors for the USB connections.
  * CON3 if for connecting the switches. A connector is not needed, as the
    switches can be wired directly. Each switch should connect one of the
-   inputs to ground when pressed. In other words a normally open (NO) type 
+   inputs to ground when pressed. In other words a normally open (NO) type
    switch should be used.
  * CON4 provides the connection to 3 status LEDs. These show the current mode
-   of the SpiffChorder, and are therefore optional. Again the LEDs can be 
+   of the SpiffChorder, and are therefore optional. Again the LEDs can be
    wired directly, no connector is needed. If the LEDs are not mounted, the
    current limiting resistors R5-R7 can be omitted as well.
  * IC1 is the ATmega168. The schematics show the pin-numbering for the P version
-   (DIL package). If using the SMD version, use the pin-names instead. The 
+   (DIL package). If using the SMD version, use the pin-names instead. The
    ATmega168V should not be used, as it does not support running at 12MHz.
-   I have used ATmega168-20PI, which is RoHS compatible, but the older 
+   I have used ATmega168-20PI, which is RoHS compatible, but the older
    ATmega168-20PU works equally well.
- * R5-R7 are current limiting resistors for the (optional) LEDs. The value 
+ * R5-R7 are current limiting resistors for the (optional) LEDs. The value
    of these depend on how bright the LEDs should be, and the voltage drop
    across the LED. For newer LEDs, a value of 1 kOhm seems to give plenty of
-   light, but you can go as low as 220 Ohm, resulting in about 20 mA current 
-   through each LED. Note that this is a considerable amount of current 
+   light, but you can go as low as 220 Ohm, resulting in about 20 mA current
+   through each LED. Note that this is a considerable amount of current
    compared to the rest of the SpiffChorder.
  * R8-R18 are optional pull-up resistors. These should only be needed if the
    wires between the microcontroller and the switches are excessively long.
@@ -60,5 +60,7 @@ NOTES:
    the value, the greater the current consumption when the switch is pressed.
    Also, of not all switches are used, the extra pull-ups are not needed
    either.
-   
+ * X1 is a 12MHz crystal. 16Mhz should work as well, if F_CPU is changed in
+   the Makefile.
+
  $Id$

@@ -17,6 +17,7 @@
  * OBDEV license for further details.                                *
  *********************************************************************/
 
+#include <stdint.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
@@ -29,7 +30,7 @@
 #include "oddebug.h"
 
 /* Hardware documentation:
- * ATmega168 @12.000 MHz
+ * ATmega168 (Should also work with ATmega8/ATmega168)
  *
  * PB0     : Pinky key
  * PB1     : Ring finger key
@@ -37,7 +38,7 @@
  * PB3     : Index finger key
  * PB4     : Near thumb
  * PB5     : Center thumb
- * PB6..PB7: 12MHz X-tal
+ * PB6..PB7: X-tal (12MHz or 16MHz)
  * PC0     : Near LED
  * PC1     : Center LED
  * PC2     : Far LED
@@ -78,7 +79,7 @@
 #define LED_SCROLL  0x04
 #define LED_COMPOSE 0x08
 #define LED_KANA    0x10
-uchar LEDstate=0;
+uint8_t LEDstate=0;
 
 /* The repeat state and counter in key_repeat can be one of these values
    to signify the state, or it can be higher than REP_STATE_TIMEOUT to
@@ -89,15 +90,16 @@ enum repeat_state_e {
   REP_STATE_TIMEOUT
 };
 /* Key repeat timer/counter. if>REP_STATE_TIMEOUT then decreased by main loop */
-volatile uchar key_repeat=REP_STATE_READY;
+volatile uint8_t key_repeat=REP_STATE_READY;
 
-uchar repeat_value=REP_STATE_TIMEOUT+23;    // 12M/(2^18)/23 = 502ms timeout
-uchar debounce_value=10;  // 10 ms debounce. Should be loaded from EEPROM.
-uchar use_early_detect=1; // This is a configuration option
+uint8_t repeat_value=REP_STATE_TIMEOUT+
+  (int)((double)F_CPU/262144/2+0.5);    // ~ 500ms timeout
+uint8_t debounce_value=10;  // 10 ms debounce. Should be loaded from EEPROM.
+uint8_t use_early_detect=1; // This is a configuration option
 
 /* Originally used as a mask for the modifier bits, but now also
    used for other x -> 2^x conversions (lookup table). */
-const char modmask[8] PROGMEM = {
+const uint8_t modmask[8] PROGMEM = {
   0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
 };
 
@@ -152,27 +154,32 @@ const prog_keymap_t *current_keymap = keymap_default;
 const prog_keymap_t *special_keymap = NULL;
 
 /* The ReportBuffer contains the USB report sent to the PC */
-static uchar reportBuffer[8];    /* buffer for HID reports */
-static uchar idleRate;           /* in 4 ms units */
-static uchar protocolVer=1;      /* 0 is the boot protocol, 1 is report protocol */
+static uint8_t reportBuffer[8];    /* buffer for HID reports */
+static uint8_t idleRate;           /* in 4 ms units */
+static uint8_t protocolVer=1;      /* 0 is the boot protocol, 1 is report protocol */
 
 /* Debounce counter. if>1 then decreased by timer interrupt */
-volatile uchar debounce=0;
+volatile uint8_t debounce=0;
 
 static void hardwareInit(void) {
+  uint8_t i=0;
   PORTB = 0x3F;   /* Enable pull-ups */
   DDRB  = 0x00;   /* Port B are switch inputs */
 
-  PORTC = 0x38;   /* LEDs on PC0..PC2, switches on PC3..PC5 */
+  PORTC = 0x3F;   /* LEDs on PC0..PC2, switches on PC3..PC5 */
   DDRC  = 0x07;   /* PC0..PC2 are outputs, PC3..PC5 are inputs */
   
-  PORTD = 0xfa;   /* 1111 1010 bin: activate pull-ups except on USB lines */
-  DDRD  = 0x07;   /* 0000 0111 bin: all pins input except USB (-> USB reset) */
+  /* Activate pull-ups except on USB lines */
+  PORTD = ~((1 << USB_CFG_DMINUS_BIT) | (1 << USB_CFG_DPLUS_BIT));
+  DDRD  = 0x02;   /* UART TX is output */  
 
-  /* USB Reset by device only required on Watchdog Reset */
-  _delay_us(11);  /* delay >10ms for USB reset */ 
-
-  DDRD = 0x02;    /* 0000 0010 bin: remove USB reset condition */
+  usbDeviceDisconnect(); /* Do a proper USB reset */
+  while (--i) {
+    wdt_reset();
+    _delay_ms(1);
+  }
+  usbDeviceConnect();
+  PORTC = 0x38;   /* Turn off LEDs */
 
 #if defined (__AVR_ATmega168__)
 # define TIFR_REG TIFR0 
@@ -181,7 +188,7 @@ static void hardwareInit(void) {
   TCCR0A = 0;     /* Normal Mode, OC disabled */
   TCCR0B = 5;     /* timer 0 prescaler: 1024 */
   /* configure timer 2 for a rate of 12M/(256 * 47) = 997.3 Hz (~1ms) */
-  OCR2A = 47;
+  OCR2A = (uint8_t)((double)F_CPU/256/1000+0.5);
   TCCR2A = (1<<WGM21); /* CTC-mode */
   TCCR2B = (6<<CS20);  /* prescaler=256 */
   TIMSK2|=(1<<OCIE2A);  /* Enable compare match interrupt */
@@ -191,7 +198,7 @@ static void hardwareInit(void) {
   /* configure timer 0 for a rate of 12M/(1024 * 256) = 45.78 Hz (~22ms) */
   TCCR0 = 5;           /* timer 0 prescaler: 1024 */
   /* configure timer 2 for a rate of 12M/(256 * 47) = 997.3 Hz (~1ms) */
-  OCR2 = 47;
+  OCR2 = (uint8_t)((double)F_CPU/256/1000+0.5);
   TCCR2 = (1<<WGM21)|(6<<CS20); /* CTC-mode, prescaler=256 */
   TIMSK|=(1<<OCIE2);   /* Enable compare match interrupt */
 #else
@@ -209,10 +216,10 @@ ISR(CMA_VECT) {
 }
 
 /* The modifier keys applied to next keypress and the modifier locks */
-uchar mod_state=0, mod_lock=0;
+uint8_t mod_state=0, mod_lock=0;
 
 /* The current mode and whether to lock the mode or only apply it to one keypress */
-uchar current_mode=0, lock_mode=0, last_modifiers=0;
+uint8_t current_mode=0, lock_mode=0, last_modifiers=0;
 
 /* Used to send the key_up event */
 const uint8_t PROGMEM key_up[] = {0};
@@ -221,7 +228,7 @@ const uint8_t PROGMEM key_up[] = {0};
 const uint8_t *pendingPtr = key_up;
 
 /* Handle a chord */
-unsigned char process_chord(uchar chord) {
+unsigned char process_chord(uint8_t chord) {
   uint8_t key;
 #ifdef KEYMAP_USES_MODIFIERS
   keymap_t keymods;
@@ -285,9 +292,9 @@ unsigned char process_chord(uchar chord) {
 }
 
 /* When the state of keys change, handle key-down or key-up */
-uchar key_change(uchar data, uchar timeout) {
-  static uchar latched=0xFF, adding=0;
-  uchar retval=0;
+uint8_t key_change(uint8_t data, uint8_t timeout) {
+  static uint8_t latched=0xFF, adding=0;
+  uint8_t retval=0;
   if (timeout) {
     // If the same chord has been held for an amount of time - send key-down - repeat starts
     if (adding) retval=process_chord(~latched);
@@ -314,10 +321,10 @@ uchar key_change(uchar data, uchar timeout) {
 
 
 /* Scan the keys, debounce, and report changes in state */
-uchar scankeys(void) {
-  static uchar olddata=0xFF;
-  uchar retval=0;
-  uchar data;
+uint8_t scankeys(void) {
+  static uint8_t olddata=0xFF;
+  uint8_t retval=0;
+  uint8_t data;
 
   data=(PINB&0x3F)|(PIND&0xC0); // Read keys
   if (olddata^data) { // Change detected
@@ -338,8 +345,8 @@ uchar scankeys(void) {
   return retval;
 }
 
-unsigned char getCharFromPending(void) {
-  static char state=0, kval=0;
+uint8_t getCharFromPending(void) {
+  static uint8_t state=0, kval=0;
   memset(reportBuffer,0,sizeof(reportBuffer)); /* Clear report buffer */
   if (state) {
     reportBuffer[0]=last_modifiers;
@@ -358,9 +365,9 @@ unsigned char getCharFromPending(void) {
   return 1;
 }
 
-uchar expectReport=0;
+uint8_t expectReport=0;
 
-uchar usbFunctionSetup(uchar data[8]) {
+uint8_t usbFunctionSetup(uint8_t data[8]) {
   usbRequest_t *rq = (void *)data;
   usbMsgPtr = reportBuffer;
   if((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS){    /* class request type */
@@ -391,7 +398,7 @@ uchar usbFunctionSetup(uchar data[8]) {
 }
 
 /* The write function is called when LEDs should be set */
-uchar usbFunctionWrite(uchar *data, uchar len) {
+uint8_t usbFunctionWrite(uint8_t *data, uint8_t len) {
   if ((expectReport)&&(len==1)) {
     LEDstate=data[0]; /* Get the state of all 5 LEDs */
   }
@@ -400,8 +407,8 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 }
 
 int main(void) {
-  uchar   updateNeeded = 0;
-  uchar   idleCounter = 0;
+  uint8_t updateNeeded = 0;
+  uint8_t idleCounter = 0;
 
   wdt_enable(WDTO_2S); /* Enable watchdog timer 2s */
   hardwareInit(); /* Initialize hardware (I/O) */

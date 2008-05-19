@@ -12,6 +12,12 @@ implemented:
 It has not yet been decided if these will be implemented before or after
 the release of version 1.00.
 
+Version 0.99 - not released yet
+-------------------------------
+
+ * Included (patched) USBaspLoader in distribution.
+ * Included patch from Christian Starkjohann for better hardware portability.
+
 
 Version 0.98 - released 2008-03-08
 ----------------------------------

@@ -1,0 +1,166 @@
+This file describes how to use the USBaspLoader boot loader with
+the SpiffChorder hardware.
+
+The USBaspLoader.2008-02-05 directory in the SpiffChorder archive
+contains a slightly modified version of the USBaspLoader boot 
+loader. The original source can be found at
+http://www.obdev.at/products/avrusb/usbasploader.html
+
+A list of what has been modified is in spiffchorder.changes.txt.
+
+I had problems with BSOD when using avrdude and this bootloader.
+The problems were resolved when I updated WinAVR and win-libusb. 
+You also need a fairly recent avrdude to get support for the usbasp
+programmer, which this boot loader emulates. If you experiencing 
+problems, you might want to make sure you have a recent version. 
+I tested this on Windows XP SP3 with WinAVR-20080512 and 
+libusb-win32 0.1.12.1. Get them here:
+http://sourceforge.net/project/showfiles.php?group_id=68108
+http://sourceforge.net/project/showfiles.php?group_id=78138
+
+Unfortunately the recent WinAVR package also has a recent gcc and
+avr-libc, which generates larger code for the boot loader. And since
+the boot loader is already crammed in the maximum 2kB boot section
+of the ATmega168, it is not possible to make it fit if using the
+newest WinAVR package. To get around this problem, the boot loader
+has been compiled for different targets (ATmega8, ATmega88 and 
+ATmega168 at clock frequencies of 12, 16 and 16.5MHz). The hex files
+for these are included in the firmware/hexfiles/ directory. The
+included files were compiled with gcc 3.4.6 from WinAVR 20060421.
+
+
+Hardware
+--------
+
+The boot loader has been modified to work with the SpiffChorder
+hardware. The USB lines are D+ on PD2 and D- on PD0. Further more
+the boot loader is triggered by pressing the 3 thumb buttons
+(PC4, PC5 and PD6 grounded) while plugging in (or resetting) the
+device. If the LEDs are mounted in your SpiffChorder hardware,
+the bootloader indicates that it has been activated by lighting
+LED1 and LED3.
+
+For more details about the hardware, look at the reference design
+for the SpiffChorder in ../circuit/chorder.png.
+
+
+Installation
+------------
+
+In order to install the boot loader in the micro controller you 
+will need an AVR programmer. Several commercial programmers are
+available and suitable for the task. I can highly recommend the
+(now slightly outdated) STK500 from Atmel, but there are many 
+other options.
+
+There are also several simple programmers that can be built on
+a shoestring budget. Do a Google search for "AVR programmer", and
+you should be able to find something that can be used.
+
+The easiest option is to find a programmer that is supported by
+avrdude, as this makes programming the boot loader into the chip
+easier. For a list of programmers supported by your version of 
+avrdude, use this command:
+  avrdude -c help
+
+When you have your programmer connected, you should edit the file
+firmware/Makefile, and adjust the PROGRAMMER option (line 23). 
+Some (most) programmers need to have the port specified, to which
+they are connected. On Windows this is specified as i.e. "-P com3",
+whereas on Linux you would specify "-P /dev/ttyS2" for the same 
+port.
+
+If you are using ATmega8 or ATmega88 you will also need to modify
+the DEVICE, BOOTLOADER_ADDRESS and FUSE_OPT parameters. For ATmega8 
+and ATmega88 the BOOTLOADER_ADDRESS is 1800, whereas it is 3800 for 
+ATmega168. The DEVICE should of course specify the microcontroller
+you are using (atmega8, atmega88 or atmega168). The FUSE_OPT should
+also be self explanatory.
+
+Once these options have been specified, you will need to figure out
+which hex-file you will use, depending on your hardware 
+configuration. The Makefile will program the firmware/main.hex file,
+so the easiest way to use it is to copy the appropriate hex-file
+from firmware/hexfiles/ to firmware/main.hex (overwrite the file
+if it already exists).
+
+Then you can program the device by using the following command:
+make flash
+
+After programming you will want to set the fuses:
+make fuse
+
+And finally, it is probably a good idea to set the lock bits, which
+will prevent the boot loader from overwriting itself:
+make lock
+
+If you are not using avrdude (e.g. if your programmer is not 
+supported), you will need to do the same steps for whatever 
+programmer you are using:
+ 1) Program the appropriate hex-file from firmware/hexfiles/*
+ 2) Set the fuses:
+      * Boot flash size = 1024 words
+      * Boot reset vector enabled
+      * Preserve EEPROM memory through the chip erase cycle
+      * Brown-out detection level = 2.7 V
+      * External crystal 8.0MHz-xxMHz 16K CK/14 CK + 65ms startup
+      * Remember to disable the CKDIV8.
+ 3) Set the lock-bits to protect the boot loade section:
+      "Boot loader protection mode 3: LPM and SPM prohibited 
+       in Boot Loader section"
+
+
+Using the boot loader
+---------------------
+
+As mentioned above, you need avrdude to use the boot loader. If you
+have installed WinAVR it should be installed in your PATH. Simply 
+click Start -> Run type "cmd" and press OK. This should open a 
+command prompt window. Try typing "avrdude -?", which should show
+the possible avrdude options. You also need libusb (on Windows 
+this is libusb-win32) to use the usbasp protocol. See the start
+of this document for information about where to get it.
+
+Once the boot loader is in place, and you have the hardware and 
+software ready, you can test it. Activate the boot loader by 
+holding the 3 thumb buttons on your chorder down while plugging 
+in the USB cable. If you have LEDs mounted on your SpiffChorder,
+you should see LED1 and LED3 light up, indicating the boot loader
+is active.
+
+Now issue the following command:
+avrdude -c usbasp -p atmega168 -t
+
+(adjust accordingly if you do not use ATmega168).
+
+You should get into the avrdude> prompt (hopefully it detects the
+programmer correctly and displays a valid signature). From this 
+prompt you can try the command "part", which displays a lot of 
+information about the selected microcontroller. If this works your
+boot loader is operating correctly. Type "quit" to leave avrdude
+terminal mode.
+
+When you quit avrdude the boot loader will exit and try to start
+the application. This may not work (if it has not been programmed
+into the flash yet). You will need to activate the boot loader
+again (unplug it, hold the 3 thumb buttons and plug it in again)
+before you can program it again.
+
+When you have verified the boot loader is working, you can use it
+to program the SpiffChorder code. Make sure you have the 
+appropriate programmer options in the SpiffChorder Makefile:
+AVRDUDE_PROGRAMMER = usbasp
+(on line 211) and
+AVRDUDE_PORT =                  # usbasp requires no port option
+(on line 217).
+
+If all is well, you should be able to program the SpiffChorder
+code with the following command:
+make program
+
+After the device has been programmed, you should hear Windows
+disconnect the boot loader and connect the SpiffChorder. You can
+now type with the SpiffChorder ;-) 
+
+
+$Id$

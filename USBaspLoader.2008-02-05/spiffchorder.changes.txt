@@ -13,19 +13,25 @@ plugging in the device. Also, because we are not using a jumper
 to activate the boot loader, but momentary buttons, the condition
 that checks if the bootloader should be terminated has been removed.
 
-I (Spiff) had problems with BSOD when using avrdude and this bootloader.
-The problems were resolved when I updated WinAVR and win-libusb. If you
-experiencing problems, you might want to make sure you have a recent 
-version. I tested this on Windows XP SP3 with WinAVR-20080512 and 
-libusb-win32 0.1.12.1. Get them here:
-http://sourceforge.net/project/showfiles.php?group_id=68108
-http://sourceforge.net/project/showfiles.php?group_id=78138
+A recent avrdude is needed to get support for the usbasp programmer.
+This means getting a recent version of WinAVR. Unfortunately the
+gcc version included in recent WinAVR packages generates larger
+code size, which means it is difficult to fit the bootloader in the
+maximum 2kB boot block. The archive therefore contains pre-compiled
+versions of the boot loader configured for different MCSs and clock
+frequencies. These are in firmware/hexfiles/*.
+
+For more information about the installation and use of the boot
+loader, look at spiffchorder.readme.txt.
+
 
 Changes to USBaspLoader
 -----------------------
 
 * Unpacked USBaspLoader.2008-02-05.zip (downloaded from
   http://www.obdev.at/products/avrusb/usbasploader.html)
+
+* Modified default fuse settings in firmware/Makefile
 
 * Edit firmware/bootloaderconfig.h
     #define USB_CFG_DMINUS_BIT      0
@@ -60,3 +66,5 @@ Changes to USBaspLoader
 * Edit firmware/Makefile
     F_CPU = 12000000
     PROGRAMMER = -c stk500v2 -P com3
+
+$Id$

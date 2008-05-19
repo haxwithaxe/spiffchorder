@@ -24,8 +24,8 @@ PROGRAMMER = -c stk500v2 -P com3
 # PROGRAMMER contains AVRDUDE options to address your programmer
 
 FUSEOPT_8 = -U hfuse:w:0xc0:m -U lfuse:w:0x9f:m
-FUSEOPT_88 = -U hfuse:w:0xd6:m -U lfuse:w:0xdf:m -U efuse:w:0x00:m
-FUSEOPT_168 = -U hfuse:w:0xd6:m -U lfuse:w:0xdf:m -U efuse:w:0x00:m
+FUSEOPT_88 = -U hfuse:w:0xd5:m -U lfuse:w:0xff:m -U efuse:w:0x00:m
+FUSEOPT_168 = -U hfuse:w:0xd5:m -U lfuse:w:0xff:m -U efuse:w:0x00:m
 # You may have to change the order of these -U commands.
 
 #---------------------------------------------------------------------
@@ -55,19 +55,19 @@ FUSEOPT_168 = -U hfuse:w:0xd6:m -U lfuse:w:0xdf:m -U efuse:w:0x00:m
 #                    \+/
 #                     +------- BOOTSZ (00 = 2k bytes)
 # Fuse high byte:
-# 0xd6 = 1 1 0 1   0 1 1 0
+# 0xd5 = 1 1 0 1   0 1 0 1
 #        ^ ^ ^ ^   ^ \-+-/
-#        | | | |   |   +------ BODLEVEL 0..2 (110 = 1.8 V)
+#        | | | |   |   +------ BODLEVEL 0..2 (101 = 2.7 V)
 #        | | | |   + --------- EESAVE (preserve EEPROM over chip erase)
 #        | | | +-------------- WDTON (if 0: watchdog always on)
 #        | | +---------------- SPIEN (allow serial programming)
 #        | +------------------ DWEN (debug wire enable)
 #        +-------------------- RSTDISBL (reset pin is enabled)
 # Fuse low byte:
-# 0xdf = 1 1 0 1   1 1 1 1
+# 0xff = 1 1 1 1   1 1 1 1
 #        ^ ^ \ /   \--+--/
 #        | |  |       +------- CKSEL 3..0 (external >8M crystal)
-#        | |  +--------------- SUT 1..0 (crystal osc, BOD enabled)
+#        | |  +--------------- SUT 1..0 (crystal osc)
 #        | +------------------ CKOUT (if 0: Clock output enabled)
 #        +-------------------- CKDIV8 (if 0: divide by 8)
 

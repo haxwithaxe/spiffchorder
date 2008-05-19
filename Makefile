@@ -144,7 +144,7 @@ CFLAGS += $(CSTANDARD)
 #             and function names needs to be present in the assembler source
 #             files -- see avr-libc docs [FIXME: not yet described there]
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
-
+ASFLAGS += -DF_CPU=$(F_CPU)UL
 
 #---------------- Library Options ----------------
 # Minimalistic printf version
@@ -202,14 +202,19 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 
 # Programming hardware: alf avr910 avrisp bascom bsd 
 # dt006 pavr picoweb pony-stk200 sp12 stk200 stk500
+# stk500v2 usbasp
 #
 # Type: avrdude -c ?
 # to get a full listing.
 #
-AVRDUDE_PROGRAMMER = stk500v2
+# Use usbasp for the bootloader included with SpiffChorder
+AVRDUDE_PROGRAMMER = usbasp
 
-# com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = com3    # programmer connected to serial device
+# The programmer (for make program) is connected to this port
+#AVRDUDE_PORT = -P com3          # serial port on Windows
+#AVRDUDE_PORT = -P lpt1          # parallel port on Windows
+#AVRDUDE_PORT = -P /dev/ttyS0    # serial port on Linux
+AVRDUDE_PORT =                  # usbasp requires no port option
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
@@ -230,7 +235,7 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 # to submit bug reports.
 #AVRDUDE_VERBOSE = -v -v
 
-AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS = -p $(MCU) $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
@@ -319,9 +324,6 @@ GENDEPFLAGS = -MD -MP -MF .dep/$(@F).d
 # Add target processor to flags.
 ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS) $(GENDEPFLAGS)
 ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
-
-
-
 
 
 # Default target.

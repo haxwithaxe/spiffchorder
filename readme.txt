@@ -36,7 +36,7 @@ of the low speed USB standard (1.5Mbps) which can be used on cheap AVR
 microcontrollers from Atmel.
 
 The hardware for the SpiffChorder is very simple, and consists mainly of 
-an ATmega168, a 12MHz crystal, and a few passive components for interfacing 
+an ATmega168, a crystal, and a few passive components for interfacing 
 with the USB port. Additionally, a number of keys are connected for the
 chorder. For the current configuration, 7 keys are used, but for future
 expansion an eigth input-line has been allocated for the normal chord
@@ -95,7 +95,9 @@ section            size      addr
 
 The number to look for is the size of the .text segment, in this case
 5904 bytes. If using the ATmega8, you have 6144 bytes if using a 
-bootloader and 8192 bytes otherwise.
+bootloader and 8192 bytes otherwise. Remember that the compiler version
+also has some influence on this. Older compilers generate smaller code
+under many circumstances.
 
 
 Building the hardware
@@ -105,7 +107,7 @@ The hardware for SpiffChorder is quite simple. Circuit diagrams are
 included in the directory "circuit" in PDF and PNG formats. The USB
 interface hardware is based on Mindaugas Milasauskas' MJoy application
 (http://www.mindaugas.com/projects/MJoy/). Apart from that, the only
-interesting things are the 12MHz crystal and interface to the 7 switches
+interesting things are the crystal and interface to the 7 switches
 and optionally 3 LEDs.
 
 No circuit board layout is published, mainly because the application
@@ -122,6 +124,11 @@ Building the firmware
 
 The SpiffChorder firmware requires avr-gcc and avr-libc (see 
 http://www.nongnu.org/avr-libc/ for more details).
+
+You may want to try the spiffchorder.hex file first (but this
+requires compatible hardware, most notably a 12MHz crystal and
+the USB connections on PD0 and PD2). If this works, you can
+play around with the code and compile yourself.
 
 Before attempting to compile, edit the Makefile to select the
 desired chord mapping and programmer options.
@@ -161,8 +168,10 @@ which uses avrdude to set the fuses for the device (provided the avrdude
 settings in the Makefile have been configured in an appropriate way).
 
 If your programmer does not work with avrdude, you should configure the
-fuses as follows (hfuse=0xDD,lfuse=0xFF):
+fuses as follows (efuse=0x01,hfuse=0xD5,lfuse=0xFF on ATmega168 with
+avrdude):
   * Boot flash size = 1024 words
+  * Preserve EEPROM memory through the chip erase cycle
   * Brown-out detection level = 2.7 V
   * External crystal 8.0MHz-xxMHz 16K CK/14 CK + 65ms startup
   * Remember to disable the CKDIV8.
@@ -178,14 +187,101 @@ External crystal, 16K CK + 64ms startup (hfuse=0xD9,lfuse=0x3F).
 
 NOTE: The fuse settings shown here do not enable the bootloader, but
 starts the SpiffChorder code directly. If a bootloader is used, you
-should set the bootloader enable fuse also (which should be described
-in the documentation regarding getting the bootloader in place).
+should set the bootloader enable fuse also.
 
 Be aware that the firmware provided here does not use OBDEV's USB 
 vendor ID, since this originally was not allowed to be used for HID 
 devices. Instead a sepearte VID/PID-pair has been acquired for the
 SpiffChorder. You may use this PID freely for SpiffChorders, even
 when changing the chord mappings or function of the code.
+
+
+Boot loader
+-----------
+
+In order to let people play with the SpiffChorder code, even if they
+do not have regular access to an AVR programming device, a boot 
+loader can be used, which will receive the new SpiffChorder firmware
+through the USB connection already present.
+
+Of course the boot loader needs to be installed in the chip before
+it can be programmed over USB. If you do not have an AVR programmer,
+try to find someone who does, and who can help you put the boot loader
+in. Alternatively there are several simple programmers that can be
+built on a shoestring budget. A range of these are supported by
+avrdude, which is included with the WinAVR package, but also available
+on Linux and Mac. Check the avrdude documentation or do a search for
+"AVR programmer" on Google.
+
+After programming the boot loader into the chip, you need to set the 
+fuses correctly, in order for the boot loader to start 
+(efuse=0x00,hfuse=0xD5,lfuse=0xFF on ATmega168 with avrdude):
+  * Boot flash size = 1024 words
+  * Boot reset vector enabled
+  * Preserve EEPROM memory through the chip erase cycle
+  * Brown-out detection level = 2.7 V
+  * External crystal 8.0MHz-xxMHz 16K CK/14 CK + 65ms startup
+  * Remember to disable the CKDIV8.
+
+When the fuses are set correctly, it is a good idea to set the boot 
+loader protection lock bits for "Boot loader protection mode 3: LPM 
+and SPM prohibited in Boot Loader section". This prevents the boot 
+loader from erasing itself in case something goes wrong. The other 
+lock bits should be left alone.
+
+You can now activate the boot loader by holding the three thumb 
+buttons on your chorder (PB4, PB5 and PD6 grounded) while plugging
+in the USB device. LED1 and LED3 should be constantly lit, indicating
+that the boot loader is waiting for a command. Now the SpiffChorder
+firmware can be written to the chorder by doing "make program" from
+the top-level Makefile (provided you have the Makefile configured for
+the usbasp programmer with avrdude. After programming, the boot loader
+will automatically exit, and start the SpiffChorder application, which
+should cause Windows to recognize the USB disconnect and connect of 
+the SpiffChorder. If you need to program again, you must restart the
+boot loader by unplugging the USB connection, holding the three thumb
+buttons and plugging in the USB connection again.
+
+For more information regarding the boot loader, look at the 
+documentation in USBaspLoader.2008-02-05/spiffchorder.readme.txt.
+
+
+Troubleshooting
+---------------
+
+This section will list a few things to try if you are having problems
+getting the SpiffChorder working.
+
+ * During startup all three LEDs light briefly when resetting the device.
+   If this does not happen on your device, the SpiffChorder code is not
+   operating properly. Make sure the crystal is connected correctly, and
+   appropriate load capasitors are present. Also check the fuse settings
+   and supply voltage. If using a 16MHz crystal you need to compile your
+   own code - the shipped hex-file will not work. If the LEDs light for 
+   about 4 seconds you are probably using the factory default ATmega168 
+   clock configuration with CKDIV=8 enabled and running on the internal
+   RC oscillator. If they light for about 3 seconds CKDIV=8 is likely
+   enabled, but you are using external 12MHz crystal. In both cases you
+   need to check the fuses. Note that PonyProg shows a tick-mark for a
+   programmed fuse, which means the fuse value is 0. If in doubt, read 
+   the data sheet carefully. Wrong fuse settings may cause your device 
+   to no longer be programmable.
+
+ * If Windows does not properly detect your device (i.e. it reports
+   "Unknown device" or "a USB device has malfunctioned"), there may be
+   problems with the fuse settings as well (check above). It can also
+   be caused by the USB lines not being connected correctly. Make sure
+   D+ and D- are connected as specified in circuit/chorder.png. Some
+   motherboards have problems with voltage levels exceeding the specified
+   3.3V on the data lines. Measure the voltage levels on D- of the USB 
+   connector. It should be between 2.6V and 3.3V. If not, there seems to
+   be a problem with the zener diodes.
+
+ * If LED1 and LED3 are stedily lit after startup, you are probably in
+   boot loader mode. Check the bootloader documentation. The boot loader
+   shipped with SpiffChorder is triggered by holding the 3 thumb buttons
+   while plugging in the device. This can happen if PB4, PB5 and PD6 are
+   all low/grounded during startup.
 
 
 Files
@@ -201,7 +297,6 @@ Makefile                Build instructions for GNU Make.
 main.c                  Main source code file.
 main.hex                Compiled version, ready to be programmed into uC.
 usbconfig.h             Configuration for AVR-USB stack.
-                        
 
 
 License information
