@@ -30,7 +30,7 @@
 #include "oddebug.h"
 
 /* Hardware documentation:
- * ATmega168 (Should also work with ATmega8/ATmega168)
+ * ATmega168 (Should also work with ATmega8/ATmega88)
  *
  * PB0     : Pinky key
  * PB1     : Ring finger key
