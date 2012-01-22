@@ -11,8 +11,8 @@ CON1                    2x3 pin header, e.g. shrouded header from Harting.
 CON2                    USB connector, alternatively cable with type-A plug.
 CON3                    Connection to switches. Can be wired directly.
 CON4                    Connection to LEDs. Optional.
-D1, D2                  3.6V zener-diode.
-IC1                     Atmel ATmega168.
+D1, D2                  3.6V zener-diode, 500mW.
+IC1                     Atmel ATmega168 (28-pin DIL).
 R1                      2.2 kOhm resistor.
 R2                      4.7 kOhm resistor.
 R3, R4                  82 Ohm resistor.
@@ -62,5 +62,8 @@ NOTES:
    either.
  * X1 is a 12MHz crystal. 16Mhz should work as well, if F_CPU is changed in
    the Makefile.
+ * D1 and D2 are 3.6V, 500mW zener diodes. Be aware that using zeners with
+   a higher power rating (e.g. 1W) may not work, because this also puts
+   substantial capacitive load on the data lines.
 
  $Id$
