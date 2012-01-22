@@ -1,23 +1,26 @@
-/*********************************************************************
- * empty.h                                                           *
- * a Blank Keyboard mapping for a 7 key chorder with 3 modes         *
- * $Id::                                                           $ *
- *********************************************************************
- * SpiffChorder is Copyright (C) 2006-2008 Mikkel Holm Olsen         *
- * based on HID-Test by Christian Starkjohann, Objective Development *
- *********************************************************************
- * Spaceman Spiff's Chording Keyboard Experiment (SpiffChorder for   *
- * short) is free software; you can redistribute it and/or modify    *
- * it under the terms of the OBDEV license, as found in the          *
- * licence.txt file.                                                 *
- *                                                                   *
- * SpiffChorder is distributed in the hope that it will be useful,   *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of    *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     *
- * OBDEV license for further details.                                *
- *********************************************************************
- * This empty map was prepaird from nasa_us.h by Greg Priest-Dorman  *
- *********************************************************************/
+/*************************************************************************
+ * empty.h                                                               *
+ * a Blank Keyboard mapping for a 7 key chorder with 3 modes             *
+ * $Id::                                                               $ *
+ *************************************************************************
+ * SpiffChorder - Spaceman Spiff's Chording Keyboard Experiment          *
+ * Copyright (C) 2006-2012  Mikkel Holm Olsen                            *
+ *                                                                       *
+ * This program is free software: you can redistribute it and/or modify  *
+ * it under the terms of the GNU General Public License as published by  *
+ * the Free Software Foundation, either version 3 of the License, or     *
+ * (at your option) any later version.                                   *
+ *                                                                       *
+ * This program is distributed in the hope that it will be useful,       *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ * GNU General Public License for more details.                          *
+ *                                                                       *
+ * You should have received a copy of the GNU General Public License     *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
+ *************************************************************************
+ * This empty map was prepared from nasa_us.h by Greg Priest-Dorman      *
+ *************************************************************************/
 #ifndef KEYMAP_H
 #define KEYMAP_H
 #include <keycodes.h>

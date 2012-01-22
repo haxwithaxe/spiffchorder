@@ -1,13 +1,20 @@
-Spaceman Spiff's Chording Keyboard Experiment (SpiffChorder for 
-short) is free software; you can redistribute it and/or modify 
-it under the terms of the OBDEV license, as found in the 
-licence.txt file.
-                                                              
-SpiffChorder is distributed in the hope that it will be useful,    
+SpiffChorder - Spaceman Spiff's Chording Keyboard Experiment
+Copyright (C) 2006-2012  Mikkel Holm Olsen
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-OBDEV license for further details.
-                                                              
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 Spaceman Spiff's Chording Keyboard Experiment (or SpiffChorder for short)
 is an experimental platform for creating a USB chording keyboard. A
 chording keyboard or Chorded keyboard is an input device where characters
@@ -27,13 +34,13 @@ and the wiki:
   http://chorder.cs.vassar.edu/spiffchorder/forside
 
 Both the hardware design and software/firmware for the SpiffChorder
-is open, and you can make modifications as you see fit. The license is 
-based on Objective Development's license, which is now GPL, but with 
-the addition that the hardware is documented and open as well.
+is open, and you can make modifications as you see fit. Both the hardware
+design and the source code for the software/firmware and driver are
+released under the terms of the GNU GPL v3.
 
-Objective Development's AVR USB driver is a firmware-only implementation 
-of the low speed USB standard (1.5Mbps) which can be used on cheap AVR 
-microcontrollers from Atmel.
+Objective Development's V-USB driver (Previously AVR-USB) is a firmware-only 
+implementation of the low speed USB standard (1.5Mbps) which can be used on 
+cheap AVR microcontrollers from Atmel.
 
 The hardware for the SpiffChorder is very simple, and consists mainly of 
 an ATmega168, a crystal, and a few passive components for interfacing 
@@ -291,25 +298,24 @@ changes.txt             What has been changed in the different versions.
 doc.txt                 Extra documentation (for further development).
 license.txt             The license this project is released under.
 circuit/                Directory with circuit diagrams in PDF and PNG formats.
-usbdrv/                 Directory with the AVR-USB driver and docs.
+usbdrv/                 Directory with the V-USB driver.
 keymaps/                Keyboard maps (chord maps).
 Makefile                Build instructions for GNU Make.
 main.c                  Main source code file.
 main.hex                Compiled version, ready to be programmed into uC.
-usbconfig.h             Configuration for AVR-USB stack.
+usbconfig.h             Configuration for V-USB stack.
 
 
 License information
 -------------------
 
 The SpiffChorder project is based on Objective Development's HIDkeys demo 
-application, and although the restriction is mainly that any derivative
-works should be published under an Open Source license, the additional
-requirements by OBDEV are very resonable, and the entire project has
-been released under this license. In other words you should feel free
-to use the firmware here for any purpose, but any enhancements should
-be given back to the community, in the form of a contribution to OBDEV's
-project pages, with full documentation.
+application, which is released under the terms of the GNU GPL v2 or v3.
+
+The SpiffChorder project is released under the terms of the GNU GLP v3.
+
+Further more we strongly encurage any derivative work to disclose circuit
+documentation.
 
 See the file license.txt for details.
 
@@ -317,7 +323,7 @@ See the file license.txt for details.
 Copyright
 ---------
 
-The SpiffChorder project and documentation is Copyright (C) 2006-2008
+The SpiffChorder project and documentation is Copyright (C) 2006-2012
 by Mikkel Holm Olsen (AKA Spaceman Spiff). More information about the
 project can be found on http://symlink.dk/projects/spiffchorder/.
 
