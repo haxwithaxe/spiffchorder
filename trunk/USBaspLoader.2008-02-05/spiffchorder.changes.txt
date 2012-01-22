@@ -55,7 +55,7 @@ Changes to USBaspLoader
         PORTC = DDRC = 0; /* Turn off LEDs */
     }
 
-    #define bootLoaderCondition()   ((PINB&0x30)==0)
+    #define bootLoaderCondition()   (((PINB&0x30)==0)&&((PIND&0x40)==0))
 
 
 * Edit firmware/main.c and change line 291
