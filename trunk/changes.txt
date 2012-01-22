@@ -19,6 +19,7 @@ Version 0.99 - not released yet
  * Included patch from Christian Starkjohann for better hardware portability.
  * Changed to GNU GPL v3 license.
  * Updated to latest V-USB driver (vusb-20120109.zip).
+ * Moved code to sourceforge.net.
 
 
 Version 0.98 - released 2008-03-08
