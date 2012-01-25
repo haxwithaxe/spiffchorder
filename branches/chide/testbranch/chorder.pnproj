@@ -1,0 +1,1 @@
+<Project name="chorder"><Folder name="keycodes"><File path="keymaps\nasa_us.h"></File><File path="keymaps\keycodes.h"></File><File path="keymaps\empty.h"></File></Folder><File path="usbconfig.h"></File><File path="main.c"></File><File path="Makefile"></File></Project>
