@@ -1,0 +1,23 @@
+Spaceman Spiff's Chording Keyboard Experiment (SpiffChorder for 
+short) is free software; you can redistribute it and/or modify 
+it under the terms of the OBDEV license, as found in the 
+licence.txt file.
+                                                              
+SpiffChorder is distributed in the hope that it will be useful,    
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+OBDEV license for further details.
+
+
+
+Spaceman Spiff's Chording Keyboard Experiment
+=============================================
+
+This document will eventually contain more detailed documentation of the
+structure of the software and hardware, useful for people who want to make
+modifications to the system.
+
+
+
+Copyright (C) 2006-2008 by Mikkel Holm Olsen
+$Id$
