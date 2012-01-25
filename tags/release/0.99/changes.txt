@@ -1,0 +1,81 @@
+Changelog for Spaceman Spiff's Chording Keyboard Experiment
+
+While release of version 1.00 of the SpiffChorder has not yet been
+planned, the current version 0.99 can be considered stable. On my
+part (Spiff's), the development happens in bursts, so I expect it
+to be put on the back burner most of the time, and then occationally
+pulled out and moved forward.
+
+If you have any ideas for improvement, please go ahead and drop me
+a note (see http://symlink.dk/contact/ for details). Also, if you want
+to get involved in the development of the SpiffChorder, feel free to
+drop me a note.
+
+These are a few things that are on the TODO-list, but no final decision
+has been taken concerning when these will be implemented, and in what
+order:
+1) On/Off-function.
+2) LED handling (showing state)
+3) Extra modifier keys.
+
+It has not yet been decided if these will be implemented before or after
+the release of version 1.00.
+
+Version 0.99 - released 2012-01-25
+----------------------------------
+
+ * Included (patched) USBaspLoader in distribution.
+ * Included patch from Christian Starkjohann for better hardware portability.
+ * Changed to GNU GPL v3 license.
+ * Updated to latest V-USB driver (vusb-20120109.zip).
+ * Moved code to sourceforge.net.
+
+
+Version 0.98 - released 2008-03-08
+----------------------------------
+
+ * Bugfix: Repeat no longer generates wrong character at end (======e).
+ * Bugfix: Clear modifiers after playing back macro.
+ * Bugfix: Clear state after doing extended key.
+ * Got proper VID/PID-pair for SpiffChorder.
+ * Switched to ATmega168 for more Flash.
+ * Changed key tables to 16-bits. Allows modifiers directly in keymaps.
+
+
+Version 0.97 - released 2008-01-05
+----------------------------------
+
+Test release.
+ * Additional special strings for * and +.
+ * Debounce implemented with hardware timer. Timeout specified in msec.
+ * Key repeat timeout using hardware timer. 22msec unit, maximum key repeat
+   delay is ~5 sec.
+ * Bugfix: leave num/sym-mode after special strings.
+ * Implemented multi-mode (one chord for shift+num-mode).
+
+
+Version 0.92 - not publicly released
+------------------------------------
+
+Major overhaul.
+ * Chord decoding totally re-written in layered architecture.
+ * Implemented "early detect" (key down event when first button released).
+
+
+Version 0.91 - not publicly released
+------------------------------------
+
+Small update.
+ * Implemented special strings (multiple characters from single chord).
+
+
+Version 0.90 - not publicly released
+------------------------------------
+
+Initial. Mostly working original feature set.
+ * Three modes (normal, function keys, numbers/symbols).
+ * switch debouncing with counter.
+ * Modifier keys working - modifier locks unused.
+ * Boot protocol compatible.
+
+$Id$

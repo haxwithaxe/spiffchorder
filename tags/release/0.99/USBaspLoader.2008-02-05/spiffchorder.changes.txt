@@ -1,0 +1,70 @@
+This file describes the changes made to USBaspLoader in order to use
+it with the SpiffChorder Chording Keyboard.
+
+More information about the SpiccChorder can be found at
+http://symlink.dk/projects/spiffchorder/ 
+and
+http://chorder.cs.vassar.edu/spiffchorder/forside
+
+The changes described below have been done in order to make the
+bootloader compatible with the SpiffChorder hardware design, and
+to trigger the boot loader by holding the 3 thumb-buttons while
+plugging in the device. Also, because we are not using a jumper
+to activate the boot loader, but momentary buttons, the condition
+that checks if the bootloader should be terminated has been removed.
+
+A recent avrdude is needed to get support for the usbasp programmer.
+This means getting a recent version of WinAVR. Unfortunately the
+gcc version included in recent WinAVR packages generates larger
+code size, which means it is difficult to fit the bootloader in the
+maximum 2kB boot block. The archive therefore contains pre-compiled
+versions of the boot loader configured for different MCSs and clock
+frequencies. These are in firmware/hexfiles/*.
+
+For more information about the installation and use of the boot
+loader, look at spiffchorder.readme.txt.
+
+
+Changes to USBaspLoader
+-----------------------
+
+* Unpacked USBaspLoader.2008-02-05.zip (downloaded from
+  http://www.obdev.at/products/avrusb/usbasploader.html)
+
+* Modified default fuse settings in firmware/Makefile
+
+* Edit firmware/bootloaderconfig.h
+    #define USB_CFG_DMINUS_BIT      0
+
+    #define HAVE_EEPROM_PAGED_ACCESS    0
+    #define HAVE_EEPROM_BYTE_ACCESS     0
+    #define BOOTLOADER_CAN_EXIT         1
+
+    static inline void  bootLoaderInit(void)
+    {
+        PORTB = 0x3F;  /* Enable pull-ups */
+        PORTD |= 0xC0; /* Enable pull-ups */
+        DDRC = PORTC = 0x05; /* Turn on LEDs */
+        MCUCSR = 0;
+    }
+
+    static inline void  bootLoaderExit(void)
+    {
+        PORTD = 0;                      /* undo bootLoaderInit() changes */
+        PORTB = 0;
+        PORTC = DDRC = 0; /* Turn off LEDs */
+    }
+
+    #define bootLoaderCondition()   (((PINB&0x30)==0)&&((PIND&0x40)==0))
+
+
+* Edit firmware/main.c and change line 291
+    }while(bootLoaderCondition());  /* main event loop */
+  to
+    }while(1);  /* main event loop */
+
+* Edit firmware/Makefile
+    F_CPU = 12000000
+    PROGRAMMER = -c stk500v2 -P com3
+
+$Id$
