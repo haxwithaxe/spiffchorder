@@ -1,10 +1,19 @@
 Changelog for Spaceman Spiff's Chording Keyboard Experiment
 
-This pre-release is for people to test the overall functions, before
-making the truely public release of version 1.00.
+While release of version 1.00 of the SpiffChorder has not yet been
+planned, the current version 0.99 can be considered stable. On my
+part (Spiff's), the development happens in bursts, so I expect it
+to be put on the back burner most of the time, and then occationally
+pulled out and moved forward.
 
-Other than that, there are a few things that will soon be 
-implemented:
+If you have any ideas for improvement, please go ahead and drop me
+a note (see http://symlink.dk/contact/ for details). Also, if you want
+to get involved in the development of the SpiffChorder, feel free to
+drop me a note.
+
+These are a few things that are on the TODO-list, but no final decision
+has been taken concerning when these will be implemented, and in what
+order:
 1) On/Off-function.
 2) LED handling (showing state)
 3) Extra modifier keys.
@@ -12,8 +21,8 @@ implemented:
 It has not yet been decided if these will be implemented before or after
 the release of version 1.00.
 
-Version 0.99 - not released yet
--------------------------------
+Version 0.99 - released 2012-01-25
+----------------------------------
 
  * Included (patched) USBaspLoader in distribution.
  * Included patch from Christian Starkjohann for better hardware portability.
