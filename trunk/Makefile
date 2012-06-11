@@ -56,7 +56,7 @@
 KEYMAP = nasa_us.h
 
 # MCU name. Default: atmega168. Also supported atmega8.
-MCU = atmega168
+MCU = at90usb1286
 
 
 # Processor frequency.
@@ -64,7 +64,7 @@ MCU = atmega168
 #     processor frequency. You can then use this symbol in your source code to 
 #     calculate timings. Do NOT tack on a 'UL' at the end, this will be done
 #     automatically to create a 32-bit value in your source code.
-F_CPU = 12000000
+F_CPU = 16000000
 
 
 # Output format. (can be srec, ihex, binary)

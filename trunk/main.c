@@ -204,6 +204,12 @@ static void hardwareInit(void) {
   OCR2 = (uint8_t)((double)F_CPU/256/1000+0.5);
   TCCR2 = (1<<WGM21)|(6<<CS20); /* CTC-mode, prescaler=256 */
   TIMSK|=(1<<OCIE2);   /* Enable compare match interrupt */
+#elif defined (__AVR_AT90USB1286__)
+# define TIFR_REG TIFR0
+  TCCR0A = 0x00;
+  TCCR0B = 0x05;
+  TIMSK2|=(1<<OCIE2A); /* Enable compare match interrupt */
+  //TIMSK0 = (1<<TOIE0); // from teensy specific code
 #else
 #error Selected microcontroller not supported
 #endif
