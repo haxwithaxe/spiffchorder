@@ -28,9 +28,14 @@
 #include <util/delay.h>
 #include <string.h>
 
-#include "usbdrv.h"
-#define DEBUG_LEVEL 0
-#include "oddebug.h"
+#if defined (__AVR_AT90USB1286__)
+# define TEENSYUSB
+# include "usb_keyboard.h"
+#else
+# include "usbdrv.h"
+# define DEBUG_LEVEL 0
+# include "oddebug.h"
+#endif
 
 /* Hardware documentation:
  * ATmega168 (Should also work with ATmega8/ATmega88)
@@ -107,6 +112,7 @@ const uint8_t modmask[8] PROGMEM = {
 };
 
 
+#ifndef TEENSYUSB
 /* USB report descriptor (length is defined in usbconfig.h)
    This has been changed to conform to the USB keyboard boot
    protocol */
@@ -145,6 +151,7 @@ char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH]
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
     0xc0                           // END_COLLECTION  
 };
+#endif
 
 /* An array of pointers to the decoding tables */
 const prog_keymap_t *keymap_tables[] PROGMEM = {
@@ -165,23 +172,24 @@ static uint8_t protocolVer=1;      /* 0 is the boot protocol, 1 is report protoc
 volatile uint8_t debounce=0;
 
 static void hardwareInit(void) {
-  uint8_t i=0;
   PORTB = 0x3F;   /* Enable pull-ups */
   DDRB  = 0x00;   /* Port B are switch inputs */
 
   PORTC = 0x3F;   /* LEDs on PC0..PC2, switches on PC3..PC5 */
   DDRC  = 0x07;   /* PC0..PC2 are outputs, PC3..PC5 are inputs */
-  
+#ifndef TEENSYUSB  
   /* Activate pull-ups except on USB lines */
   PORTD = ~((1 << USB_CFG_DMINUS_BIT) | (1 << USB_CFG_DPLUS_BIT));
   DDRD  = 0x02;   /* UART TX is output */  
 
   usbDeviceDisconnect(); /* Do a proper USB reset */
+  uint8_t i=0;
   while (--i) {
     wdt_reset();
     _delay_ms(1);
   }
   usbDeviceConnect();
+#endif
   PORTC = 0x38;   /* Turn off LEDs */
 
 #if defined (__AVR_ATmega168__)
@@ -376,6 +384,7 @@ uint8_t getCharFromPending(void) {
 
 uint8_t expectReport=0;
 
+#ifndef TEENSYUSB
 uint8_t usbFunctionSetup(uint8_t data[8]) {
   usbRequest_t *rq = (void *)data;
   usbMsgPtr = reportBuffer;
@@ -406,6 +415,7 @@ uint8_t usbFunctionSetup(uint8_t data[8]) {
   return 0;
 }
 
+
 /* The write function is called when LEDs should be set */
 uint8_t usbFunctionWrite(uint8_t *data, uint8_t len) {
   if ((expectReport)&&(len==1)) {
@@ -414,18 +424,23 @@ uint8_t usbFunctionWrite(uint8_t *data, uint8_t len) {
   expectReport=0;
   return 0x01;
 }
-
+#endif
 int main(void) {
   uint8_t updateNeeded = 0;
   uint8_t idleCounter = 0;
 
   wdt_enable(WDTO_2S); /* Enable watchdog timer 2s */
   hardwareInit(); /* Initialize hardware (I/O) */
-  
-  odDebugInit();
 
+#ifdef TEENSYUSB
+  usb_init();
+  while (!usb_configured()) /* wait */ ;
+  _delay_ms(1000);
+#else
+  odDebugInit();
   usbInit(); /* Initialize USB stack processing */
   sei(); /* Enable global interrupts */
+#endif
   
   for(;;){  /* Main loop */
     wdt_reset(); /* Reset the watchdog */
@@ -458,7 +473,15 @@ int main(void) {
     /* If an update is needed, send the report */
     if (updateNeeded && usbInterruptIsReady()) {
       updateNeeded = 0;
+#ifdef TEENSYUSB
+		for (int z = 2;z<=9;z++)
+		{
+			keyboard_keys[z-2]=reportBuffer[z];
+		}
+		usb_keyboard_press(reportBuffer[2],reportBuffer[0]);
+#else
       usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
+#endif
     }
   }
   return 0;
