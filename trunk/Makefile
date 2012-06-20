@@ -76,7 +76,7 @@ TARGET = spiffchorder
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = usbdrv/usbdrv.c usbdrv/oddebug.c main.c 
+SRC = main.c usb_keyboard.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -85,7 +85,7 @@ SRC = usbdrv/usbdrv.c usbdrv/oddebug.c main.c
 #     Even though the DOS/Win* filesystem matches both .s and .S the same,
 #     it will preserve the spelling of the filenames, and gcc itself does
 #     care about how the name is spelled on its command-line.
-ASRC = usbdrv/usbdrvasm.S
+ASRC = 
 
 
 # Optimization level, can be [0, 1, 2, 3, s]. 
@@ -121,7 +121,7 @@ CDEFS = -DF_CPU=$(F_CPU)UL
 
 
 # Place -I options here
-CINCS = -Iusbdrv 
+CINCS =
 
 
 

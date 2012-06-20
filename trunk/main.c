@@ -27,15 +27,15 @@
 #include <avr/wdt.h>
 #include <util/delay.h>
 #include <string.h>
+#include "usb_keyboard.h"
 
-#if defined (__AVR_AT90USB1286__)
-# define TEENSYUSB
-# include "usb_keyboard.h"
-#else
-# include "usbdrv.h"
-# define DEBUG_LEVEL 0
-# include "oddebug.h"
-#endif
+#define TEENSYUSB
+#define KEYPORT PORTC
+#define KEYDDR DDRC
+#define KEYPIN PINC
+#define MODPORT PORTB
+#define MODDDR DDRB
+#define MODPIN PINB
 
 /* Hardware documentation:
  * ATmega168 (Should also work with ATmega8/ATmega88)
@@ -58,28 +58,53 @@
  * PD2/INT0: D+ USB positive (needs appropriate zener-diode and resistors)
  * PD6     : Far thumb
  * PD7     : Extra chord button (unused)
- *
- * USB Connector:
- * -------------
- *  1 (red)    +5V
- *  2 (white)  DATA-
- *  3 (green)  DATA+
- *  4 (black)  GND
- *    
- *                                     VCC
- *                  +--[4k7]--+--[2k2]--+
- *      USB        GND        |                     ATmega-8
- *                            |
- *      (D-)-------+----------+--------[82r]------- PD0
- *                 |
- *      (D+)-------|-----+-------------[82r]------- PD2/INT0
- *                 |     |
- *                 _     _
- *                 ^     ^  2 x 3.6V 
- *                 |     |  zener to GND
- *                 |     |
- *                GND   GND
  */
+/* AT90USB1286 RELATED */
+#define CPU_PRESCALE(n) (CLKPR = 0x80, CLKPR = (n))
+
+/* Pin definition utils */
+#define PIN(p,n) (p & (1 << n))
+#define SET_INPUT(ddr) (ddr = 0x00)
+#define SET_PULLUP(port) (port = 0xFF)
+#define LED_ON(port) (port &= ~(1<<6))
+#define LED_OFF(port) (port |= (1<<6))
+
+/* Define Key Pins */
+// Pinky key
+#define Pinky_R PIN(KEYPIN,0)
+// Ring finger key
+#define Ring_R PIN(KEYPIN,1)
+// Middle finger key
+#define Middle_R PIN(KEYPIN,2)
+// Index finger key
+#define Index_R PIN(KEYPIN,3)
+// Near thumb
+#define Near_Thumb_R PIN(KEYPIN,4)
+// Center thumb
+#define Center_Thumb_R PIN(KEYPIN,5)
+// Far thumb
+#define Far_Thumb_R PIN(KEYPIN,6)
+
+// Unused modifier 1
+#define X_mod1 PIN(MODPIN,0)
+// Unused modifier 2
+#define X_mod2 PIN(MODPIN,1)
+// Unused modifier 3
+#define X_mod3 PIN(MODPIN,2)
+// Extra chord button (unused)
+#define XCHRD_R PIN(MODPIN,3)
+
+/* LED PINS */
+#define LEDS PORTD
+// Near Thumb LED
+#define LED_Near_Thumb PORTD
+// Center Thumb LED
+#define LED_Center_Thumb PORTD
+// Far Thumb LED
+#define LED_Far_Thumb PORTD
+
+/* Leftovers from original source comments */
+// PB6..PB7: X-tal (12MHz or 16MHz)
 
 /* LEDs on a boot-protocol keyboard */
 #define LED_NUM     0x01
@@ -111,48 +136,6 @@ const uint8_t modmask[8] PROGMEM = {
   0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
 };
 
-
-#ifndef TEENSYUSB
-/* USB report descriptor (length is defined in usbconfig.h)
-   This has been changed to conform to the USB keyboard boot
-   protocol */
-char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
-  PROGMEM = {
-    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
-    0x09, 0x06,                    // USAGE (Keyboard)
-    0xa1, 0x01,                    // COLLECTION (Application)
-    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
-    0x19, 0xe0,                    //   USAGE_MINIMUM (Keyboard LeftControl)
-    0x29, 0xe7,                    //   USAGE_MAXIMUM (Keyboard Right GUI)
-    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
-    0x75, 0x01,                    //   REPORT_SIZE (1)
-    0x95, 0x08,                    //   REPORT_COUNT (8)
-    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
-    0x95, 0x01,                    //   REPORT_COUNT (1)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x81, 0x03,                    //   INPUT (Cnst,Var,Abs)
-    0x95, 0x05,                    //   REPORT_COUNT (5)
-    0x75, 0x01,                    //   REPORT_SIZE (1)
-    0x05, 0x08,                    //   USAGE_PAGE (LEDs)
-    0x19, 0x01,                    //   USAGE_MINIMUM (Num Lock)
-    0x29, 0x05,                    //   USAGE_MAXIMUM (Kana)
-    0x91, 0x02,                    //   OUTPUT (Data,Var,Abs)
-    0x95, 0x01,                    //   REPORT_COUNT (1)
-    0x75, 0x03,                    //   REPORT_SIZE (3)
-    0x91, 0x03,                    //   OUTPUT (Cnst,Var,Abs)
-    0x95, 0x06,                    //   REPORT_COUNT (6)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x25, 0x65,                    //   LOGICAL_MAXIMUM (101)
-    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
-    0x19, 0x00,                    //   USAGE_MINIMUM (Reserved (no event indicated))
-    0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)
-    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
-    0xc0                           // END_COLLECTION  
-};
-#endif
-
 /* An array of pointers to the decoding tables */
 const prog_keymap_t *keymap_tables[] PROGMEM = {
   keymap_default,                  // The default mode
@@ -172,56 +155,21 @@ static uint8_t protocolVer=1;      /* 0 is the boot protocol, 1 is report protoc
 volatile uint8_t debounce=0;
 
 static void hardwareInit(void) {
-  PORTB = 0x3F;   /* Enable pull-ups */
-  DDRB  = 0x00;   /* Port B are switch inputs */
+  SET_PULLUP(MODPORT);   /* Enable pull-ups */
+  SET_INPUT(MODDDR);   /* Port B are switch inputs */
 
-  PORTC = 0x3F;   /* LEDs on PC0..PC2, switches on PC3..PC5 */
-  DDRC  = 0x07;   /* PC0..PC2 are outputs, PC3..PC5 are inputs */
-#ifndef TEENSYUSB  
-  /* Activate pull-ups except on USB lines */
-  PORTD = ~((1 << USB_CFG_DMINUS_BIT) | (1 << USB_CFG_DPLUS_BIT));
-  DDRD  = 0x02;   /* UART TX is output */  
+  SET_PULLUP(KEYPORT);   /* LEDs on PC0..PC2, switches on PC3..PC5 */
+  SET_INPUT(KEYDDR);   /* pins 0-6 are pinky-thumbs keys used to be: PC0..PC2 are outputs, PC3..PC5 are inputs */
 
-  usbDeviceDisconnect(); /* Do a proper USB reset */
-  uint8_t i=0;
-  while (--i) {
-    wdt_reset();
-    _delay_ms(1);
-  }
-  usbDeviceConnect();
-#endif
-  PORTC = 0x38;   /* Turn off LEDs */
-
-#if defined (__AVR_ATmega168__)
-# define TIFR_REG TIFR0 
-# define CMA_VECT TIMER2_COMPA_vect
-  /* configure timer 0 for a rate of 12M/(1024 * 256) = 45.78 Hz (~22ms) */
-  TCCR0A = 0;     /* Normal Mode, OC disabled */
-  TCCR0B = 5;     /* timer 0 prescaler: 1024 */
-  /* configure timer 2 for a rate of 12M/(256 * 47) = 997.3 Hz (~1ms) */
-  OCR2A = (uint8_t)((double)F_CPU/256/1000+0.5);
-  TCCR2A = (1<<WGM21); /* CTC-mode */
-  TCCR2B = (6<<CS20);  /* prescaler=256 */
-  TIMSK2|=(1<<OCIE2A);  /* Enable compare match interrupt */
-#elif defined (__AVR_ATmega8__)
-# define TIFR_REG TIFR
-# define CMA_VECT TIMER2_COMP_vect
-  /* configure timer 0 for a rate of 12M/(1024 * 256) = 45.78 Hz (~22ms) */
-  TCCR0 = 5;           /* timer 0 prescaler: 1024 */
-  /* configure timer 2 for a rate of 12M/(256 * 47) = 997.3 Hz (~1ms) */
-  OCR2 = (uint8_t)((double)F_CPU/256/1000+0.5);
-  TCCR2 = (1<<WGM21)|(6<<CS20); /* CTC-mode, prescaler=256 */
-  TIMSK|=(1<<OCIE2);   /* Enable compare match interrupt */
-#elif defined (__AVR_AT90USB1286__)
-# define TIFR_REG TIFR0
+#define TIFR_REG TIFR0
   TCCR0A = 0x00;
   TCCR0B = 0x05;
-  TIMSK2|=(1<<OCIE2A); /* Enable compare match interrupt */
+  TIMSK2|=(1<<OCIE2A); // Enable compare match interrupt
   //TIMSK0 = (1<<TOIE0); // from teensy specific code
-#else
-#error Selected microcontroller not supported
+#ifndef TEENSYUSB
+#error Selected microcontroller (__AVR_AT90USB1286__) not supported
 #endif
-
+   LED_OFF(LEDS);   /* Turn off LEDs */
 }
 
 /* Timer 2 interrupt handler - decrease debounce counter every 1ms */
@@ -336,6 +284,10 @@ uint8_t key_change(uint8_t data, uint8_t timeout) {
   return retval;
 }
 
+uint8_t read_keys() {
+	uint8_t keyvals = KEYPIN;
+	return keyvals;
+}
 
 /* Scan the keys, debounce, and report changes in state */
 uint8_t scankeys(void) {
@@ -343,7 +295,7 @@ uint8_t scankeys(void) {
   uint8_t retval=0;
   uint8_t data;
 
-  data=(PINB&0x3F)|(PIND&0xC0); // Read keys
+  data=read_keys();
   if (olddata^data) { // Change detected
     if (debounce==0) {
       debounce=debounce_value;
@@ -384,47 +336,8 @@ uint8_t getCharFromPending(void) {
 
 uint8_t expectReport=0;
 
-#ifndef TEENSYUSB
-uint8_t usbFunctionSetup(uint8_t data[8]) {
-  usbRequest_t *rq = (void *)data;
-  usbMsgPtr = reportBuffer;
-  if((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS){    /* class request type */
-    if(rq->bRequest == USBRQ_HID_GET_REPORT){  
-      /* wValue: ReportType (highbyte), ReportID (lowbyte) */
-      /* we only have one report type, so don't look at wValue */
-      return sizeof(reportBuffer);
-    }else if(rq->bRequest == USBRQ_HID_SET_REPORT){
-      if (rq->wLength.word == 1) { /* We expect one byte reports */
-        expectReport=1;
-        return 0xFF; /* Call usbFunctionWrite with data */
-      }  
-    }else if(rq->bRequest == USBRQ_HID_GET_IDLE){
-      usbMsgPtr = &idleRate;
-      return 1;
-    }else if(rq->bRequest == USBRQ_HID_SET_IDLE){
-      idleRate = rq->wValue.bytes[1];
-    }else if(rq->bRequest == USBRQ_HID_GET_PROTOCOL) {
-      if (rq->wValue.bytes[1] < 1) {
-        protocolVer = rq->wValue.bytes[1];
-      }
-    }else if(rq->bRequest == USBRQ_HID_SET_PROTOCOL) {
-      usbMsgPtr = &protocolVer;
-      return 1;
-    }
-  }
-  return 0;
-}
 
 
-/* The write function is called when LEDs should be set */
-uint8_t usbFunctionWrite(uint8_t *data, uint8_t len) {
-  if ((expectReport)&&(len==1)) {
-    LEDstate=data[0]; /* Get the state of all 5 LEDs */
-  }
-  expectReport=0;
-  return 0x01;
-}
-#endif
 int main(void) {
   uint8_t updateNeeded = 0;
   uint8_t idleCounter = 0;
@@ -432,19 +345,14 @@ int main(void) {
   wdt_enable(WDTO_2S); /* Enable watchdog timer 2s */
   hardwareInit(); /* Initialize hardware (I/O) */
 
-#ifdef TEENSYUSB
   usb_init();
   while (!usb_configured()) /* wait */ ;
   _delay_ms(1000);
-#else
-  odDebugInit();
-  usbInit(); /* Initialize USB stack processing */
-  sei(); /* Enable global interrupts */
-#endif
+
   
   for(;;){  /* Main loop */
     wdt_reset(); /* Reset the watchdog */
-    usbPoll(); /* Poll the USB stack */
+    //usbPoll(); /* Poll the USB stack */
     
     if (!updateNeeded) {
       if (pendingPtr) {
@@ -471,17 +379,13 @@ int main(void) {
     }
     
     /* If an update is needed, send the report */
-    if (updateNeeded && usbInterruptIsReady()) {
+    if (updateNeeded) {
       updateNeeded = 0;
-#ifdef TEENSYUSB
 		for (int z = 2;z<=9;z++)
 		{
 			keyboard_keys[z-2]=reportBuffer[z];
 		}
 		usb_keyboard_press(reportBuffer[2],reportBuffer[0]);
-#else
-      usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
-#endif
     }
   }
   return 0;
